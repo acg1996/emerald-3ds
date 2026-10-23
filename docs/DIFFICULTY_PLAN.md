@@ -312,3 +312,13 @@ mantiene el nivel original, que es el tope.
 | Cacturne | 46 | Velo Arena | Restos | Púas, Brazo Aguja, Finta, Drenadoras |
 | Sharpedo | 48 | Piel Tosca | Agua Mística | Triturar, Surf, Rayo Hielo, Mofa |
 | Absol | 49 | Presión | Lupa | Danza Espada, Cuchillada, Ataque Aéreo, Avalancha |
+
+**Phoebe** (Mal de Ojo, estados y Garantía; 5 Pokémon, tope 51; Shedinja y Gengar sustituyen a los repetidos)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Shedinja | 48 | Garantía | Baya Lum | Bola Sombra, Rayo Confuso, Protección, Rencor |
+| Banette | 49 | Insomnio | Hechizo | Bola Sombra, Finta, Fuego Fatuo, Desarme |
+| Gengar | 49 | Levitación | Campana Concha | Hipnosis, Comesueños, Bola Sombra, Rayo |
+| Sableye | 50 | Vista Lince | Polvo Brillo | Mal de Ojo, Bola Sombra, Rayo Confuso, Desarme |
+| Dusclops | 51 | Presión | Restos | Mal de Ojo, Fuego Fatuo, Bola Sombra, Terremoto |
