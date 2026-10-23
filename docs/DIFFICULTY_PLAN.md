@@ -237,3 +237,28 @@ líderes en los ajustes *IV entrenadores*, *IA entrenadores* y *Equipos nuevos*
 | Torchic | Lombre 18, Slugma 18, Electrike 18, Marshtomp 20 |
 
 Pendientes del rival: Ruta 103, Petalia, Ruta 119 y Lilycove.
+
+## Equipos acordados, pendientes de implementar
+
+Se decidió acordarlos todos antes de compilar. Niveles originales; el as
+mantiene el nivel original, que es el tope.
+
+**Wattson** (parálisis y golpes seguros; 5 Pokémon, tope 24)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Voltorb | 20 | Electricidad Estática | Baya Zidra | Chispa, Onda Trueno, Chirrido, Autodestrucción |
+| Plusle | 20 | Más | Baya Aranja | Chispa, Onda Trueno, Ataque Rápido, Otra Vez |
+| Magneton | 22 | Imán | Imán | Rayo, Onda Trueno, Supersónico, Chispa |
+| Electabuzz | 23 | Electricidad Estática | Restos | Puño Trueno, Ataque Rápido, Pantalla de Luz, Rapidez |
+| Manectric | 24 | Pararrayos | Baya Lum | Rayo, Ataque Rápido, Onda Trueno, Mordisco |
+
+**Flannery** (equipo de sol; 5 Pokémon, tope 29)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Slugma | 24 | Cuerpo Llama | Baya Zidra | Día Soleado, Recalentón, Lanzarrocas, Bostezo |
+| Numel | 24 | Despiste | Baya Aranja | Recalentón, Magnitud, Derribo, Amnesia |
+| Magmar | 25 | Cuerpo Llama | Campana Concha | Puño Fuego, Puño Trueno, Polución, Pantalla de Humo |
+| Camerupt | 26 | Armadura Magma | Restos | Recalentón, Terremoto, Avalancha, Amnesia |
+| Torkoal | 29 | Humo Blanco | Hierba Blanca | Recalentón, Lanzallamas, Golpe Cuerpo, Protección |
