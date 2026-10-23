@@ -2,7 +2,7 @@
 
 Documento de diseño para las mejoras de dificultad de este fork. Está escrito
 antes de programar nada: recoge lo que se quiere, cómo encaja en el código
-actual y lo que queda por decidir. Todavía no hay nada implementado.
+actual y lo que queda por decidir. Las decisiones de diseño están cerradas (ver más abajo); todavía no hay nada implementado.
 
 ## Objetivo
 
@@ -51,7 +51,7 @@ Una página nueva en OPTIONS con estas opciones (cada una es una clave en
 | Opción | Valores | Clave |
 |---|---|---|
 | IVs de entrenadores: a quién | Original / Líderes y Alto Mando / Todos | `diff_iv_scope` |
-| IVs de entrenadores: calidad | Muy buenos / Perfectos | `diff_iv_level` |
+| IVs de entrenadores: calidad | Muy buenos (25 a 31 al azar por estadística) / Perfectos (31) | `diff_iv_level` |
 | Level cap | Apagado / Líderes / Líderes y Alto Mando | `diff_level_cap` |
 | IA de entrenadores | Original / Mejorada (líderes y Alto Mando) / Mejorada (todos) | `diff_ai` |
 | Equipos rediseñados | Apagado / Líderes / Líderes y Alto Mando | `diff_teams` |
@@ -60,15 +60,19 @@ Una página nueva en OPTIONS con estas opciones (cada una es una clave en
 ## 1. IVs de entrenadores
 
 - **Alcance:** solo líderes y Alto Mando, o todos los entrenadores.
-- **Calidad:** "muy buenos" o "perfectos" (31 en todas las estadísticas).
-- **Cómo:** en `CreateNPCTrainerParty` se sustituye el cálculo de `fixedIV`
-  por una función que mira los dos ajustes. Para decidir si un entrenador es
+- **Calidad:** "muy buenos" (cada estadística al azar entre 25 y 31) o
+  "perfectos" (31 en todas).
+- **Cómo:** `CreateMon` solo admite un IV igual para las seis estadísticas.
+  Para los muy buenos, tras crear el Pokémon se escribe cada IV por separado
+  con `SetMonData`. En `CreateNPCTrainerParty` se llama a una función que mira
+  los dos ajustes. Para decidir si un entrenador es
   líder o Alto Mando se usa `gTrainers[id].trainerClass`
   (`TRAINER_CLASS_LEADER`, `TRAINER_CLASS_ELITE_FOUR`, `TRAINER_CLASS_CHAMPION`),
   que cubre también las revanchas.
 - No afecta a la Zona de Combate ni a las bases secretas, que usan sus propios
-  equipos.
-- "Muy buenos" lo defino como **28 en todo**, ajustable. Ver D3.
+  equipos (D7).
+- Los IVs aleatorios deben ser deterministas por combate, para que reiniciar
+  un combate no cambie al rival. Se derivan de la personalidad del Pokémon.
 
 ## 2. Level cap
 
@@ -120,6 +124,10 @@ inteligente de objetos.
   clara, no usar movimientos de subida si el rival puede noquear de un golpe,
   preferir el movimiento más fuerte cuando acaba al rival, usar los
   movimientos de apoyo cuando el Pokémon es seguro.
+- **Zona de Combate y bases secretas:** sus equipos y sus IVs no se tocan, pero
+  la IA mejorada sí se aplica. Sus flags se fijan en una sola línea de
+  `battle_ai_script_commands.c` (archivo sin huella), así que basta con sumar los
+  flags nuevos cuando `diff_ai` lo pida.
 - Es la parte más difícil de afinar: se prueba combatiendo, no solo
   compilando. Se hará en iteraciones cortas.
 
@@ -161,19 +169,21 @@ Puntos delicados:
 Cada fase termina con una compilación, una prueba (emulador Azahar o 3DS real)
 y un commit.
 
-## Decisiones pendientes
+## Decisiones tomadas
 
-- **D1: ajustes globales o por partida.** Hoy `settings.txt` es de la consola.
-  Si empiezas dos partidas, comparten dificultad. ¿Basta con eso, o prefieres
-  que la dificultad se fije al empezar partida nueva? Lo segundo exige guardar
-  datos propios aparte del save.
-- **D2: EVs al llegar al tope.** ¿Siguen ganándose EVs aunque no suba el nivel?
-- **D3: valor de "muy buenos IVs".** Propongo 28. ¿Otro?
-- **D4: ¿el campeón cuenta como parte del Alto Mando para el cap?** Y después
-  del campeón, ¿se desactiva el tope?
-- **D5: revanchas.** ¿Los líderes rediseñados también en las revanchas?
-- **D6: aleatorizador contra equipos diseñados** (ver arriba).
-- **D7: Zona de Combate.** ¿Se queda como está? Propongo que sí.
+- **D1: ajustes globales.** La dificultad vive en `settings.txt`, como el resto
+  de ajustes del port, y se puede cambiar en cualquier momento.
+- **D2: EVs al llegar al tope.** Se siguen ganando; solo se bloquea la
+  experiencia.
+- **D3: IVs "muy buenos".** Cada estadística al azar entre 25 y 31.
+- **D4: Alto Mando y campeón.** El tope sigue al siguiente miembro no derrotado,
+  con Steven como último. Al vencer al campeón el tope se desactiva.
+- **D5: revanchas.** Los líderes rediseñados también en las revanchas, con
+  equipos más fuertes y el mismo estilo.
+- **D6: aleatorizador contra equipos diseñados.** Si el aleatorizador de líderes
+  está activo, manda el aleatorio y el equipo diseñado se ignora.
+- **D7: Zona de Combate y bases secretas.** Sus equipos e IVs quedan como están,
+  pero reciben la IA mejorada.
 
 ## Riesgos
 
