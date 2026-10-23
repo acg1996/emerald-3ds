@@ -19,6 +19,7 @@
 #include "constants/trainers.h"
 #include "3ds_extras.h"
 #include "3ds_difficulty.h"
+#include "3ds_trainer_teams.h"
 
 enum
 {
@@ -100,9 +101,11 @@ static const u16 sEliteFourDefeated[] =
 static u8 TopLevel(u16 trainerNum)
 {
     const struct Trainer *trainer = &gTrainers[trainerNum];
-    u8 top = 0, lvl;
+    u8 top = CtrTeams_TopLevel(trainerNum), lvl;
     u8 i;
 
+    if (top != 0)
+        return top;
     for (i = 0; i < trainer->partySize; i++)
     {
         switch (trainer->partyFlags)

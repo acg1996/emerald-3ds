@@ -76,6 +76,8 @@ build/bridge/3ds_bottom_ui.o: FULLCFLAGS += -DCTR_APP_VERSION='"$(APP_VERSION)"'
 BACKEND_SRCS += src/3ds_extras.c
 # The DIFFICULTY page's settings applied to the game (include/3ds_difficulty.h).
 BACKEND_SRCS += src/3ds_difficulty.c
+# The leaders' and Elite Four's redesigned teams (include/3ds_trainer_teams.h).
+BACKEND_SRCS += src/3ds_trainer_teams.c
 # Local wireless play: the emulated Wireless Adapter the game's link code
 # talks to (its radio is src/3ds_local.c).
 BACKEND_SRCS += src/3ds_rfu_adapter.c

@@ -1,0 +1,22 @@
+Emerald 3DS difficulty: the redesigned leader teams (CreateNPCTrainerParty).
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_main.c
++++ b/src/battle_main.c
+@@ -2,6 +2,7 @@
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+ #include "3ds_difficulty.h" // difficulty settings
++#include "3ds_trainer_teams.h" // redesigned leader teams
+ #endif
+ #include "battle.h"
+ #include "battle_anim.h"
+@@ -2075,6 +2076,7 @@
+ 
+         gBattleTypeFlags |= gTrainers[trainerNum].doubleBattle;
+ #ifdef PLATFORM_3DS
++        monsCount = CtrTeams_Apply(party, monsCount, trainerNum);
+         CtrDifficulty_ApplyTrainerIvs(party, monsCount, trainerNum);
+ #endif
+     }
