@@ -1,0 +1,66 @@
+Emerald 3DS difficulty: level cap (experience in battle, Rare Candy).
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_script_commands.c
++++ b/src/battle_script_commands.c
+@@ -1,6 +1,7 @@
+ #include "global.h"
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
++#include "3ds_difficulty.h" // difficulty settings
+ #endif
+ #include "battle.h"
+ #include "battle_message.h"
+@@ -3404,6 +3405,17 @@
+                 gBattleScripting.getexpState = 5;
+                 gBattleMoveDamage = 0; // used for exp
+             }
++#ifdef PLATFORM_3DS
++            // Level cap (OPTIONS, DIFFICULTY): no experience, but the EVs still come.
++            else if (CtrDifficulty_AtLevelCap(&gPlayerParty[gBattleStruct->expGetterMonId]))
++            {
++                if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP))
++                    MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBattlerFainted].species);
++                *(&gBattleStruct->sentInPokes) >>= 1;
++                gBattleScripting.getexpState = 5;
++                gBattleMoveDamage = 0; // used for exp
++            }
++#endif
+             else if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) == MAX_LEVEL)
+             {
+                 *(&gBattleStruct->sentInPokes) >>= 1;
+@@ -3461,6 +3473,10 @@
+                         i = STRINGID_EMPTYSTRING4;
+                     }
+ 
++#ifdef PLATFORM_3DS
++                    // Level cap: it may gain up to the cap, no further.
++                    gBattleMoveDamage = CtrDifficulty_ClampExp(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMoveDamage);
++#endif
+                     // get exp getter battler
+                     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+                     {
+--- a/src/party_menu.c
++++ b/src/party_menu.c
+@@ -1,6 +1,7 @@
+ #include "global.h"
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
++#include "3ds_difficulty.h" // difficulty settings
+ #endif
+ #include "malloc.h"
+ #include "battle.h"
+@@ -5141,7 +5142,11 @@
+     u16 *itemPtr = &gSpecialVar_ItemId;
+     bool8 cannotUseEffect;
+ 
+-    if (GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL)
++    if (GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL
++#ifdef PLATFORM_3DS
++        && !CtrDifficulty_AtLevelCap(mon) // level cap (OPTIONS, DIFFICULTY)
++#endif
++        )
+     {
+         BufferMonStatsToTaskData(mon, arrayPtr);
+         cannotUseEffect = ExecuteTableBasedItemEffect_(gPartyMenu.slotId, *itemPtr, 0);

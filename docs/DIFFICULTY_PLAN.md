@@ -85,7 +85,7 @@ Una página nueva en OPTIONS con estas opciones (cada una es una clave en
 - **Orden de líderes:** Roxanne, Brawly, Wattson, Flannery, Norman, Winona,
   Tate y Liza, Wallace. Se sabe cuál toca por las medallas conseguidas.
 - **Alto Mando:** el tope pasa a ser el Pokémon más fuerte del **siguiente
-  miembro** no derrotado (Sidney, Phoebe, Glacia, Drake y Steven), usando las
+  miembro** no derrotado (Sidney, Phoebe, Glacia y Drake) y, por último, la campeona o el campeón Wallace, usando las
   flags de derrotado de cada uno. Si resultara frágil, el plan B es usar solo
   al último.
 - **Qué pasa al llegar al tope:** el Pokémon deja de ganar experiencia
@@ -177,7 +177,7 @@ y un commit.
   experiencia.
 - **D3: IVs "muy buenos".** Cada estadística al azar entre 25 y 31.
 - **D4: Alto Mando y campeón.** El tope sigue al siguiente miembro no derrotado,
-  con Steven como último. Al vencer al campeón el tope se desactiva.
+  con Wallace (el campeón de Esmeralda) como último. Al vencer al campeón el tope se desactiva.
 - **D5: revanchas.** Los líderes rediseñados también en las revanchas, con
   equipos más fuertes y el mismo estilo.
 - **D6: aleatorizador contra equipos diseñados.** Si el aleatorizador de líderes
