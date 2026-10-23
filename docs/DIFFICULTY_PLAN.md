@@ -399,3 +399,26 @@ Alto Mando, Wallace y los 15 del rival para Brendan y May). Cada uno lleva
 IVs y EVs según su fuerza: líderes 20 y 40, Alto Mando y Wallace 25 y 120,
 revanchas 28 y 180 la primera y 31 y 252 el resto. El rival sube de 20 y 40 a
 25 y 100 hacia Lilycove.
+
+## Nuzlocke y aleatorizador (implementados)
+
+Los dos son opciones de la pestaña DIFIC. y se pueden dejar apagadas.
+
+**Nuzlocke** (`diff_nuzlocke`): solo se puede capturar el primer Pokémon de
+cada zona (cláusulas de cromáticos y de repetidos siempre activas); un Pokémon
+debilitado está muerto (el Centro Pokémon no lo cura y los Revivir no le
+sirven, ni ningún objeto); perder un combate falla el intento. El estado se
+guarda en `emerald3ds.nuz`, ligado al CRC de cada partida. Una zona gastada
+bloquea la Poké Ball con el aviso de "el entrenador bloquea la bola".
+
+**Aleatorizador** (`diff_random`), con una semilla propia de cada partida:
+
+| Modo | Qué cambia |
+|---|---|
+| 1 | Pokémon salvajes (por mapa) |
+| 2 | + Pokémon de entrenadores normales |
+| 3 | + líderes, Alto Mando, campeón y rival (anula los equipos diseñados), iniciales, regalos y estáticos |
+| 4 | + habilidades y movimientos por nivel |
+
+Cualquier especie, legendarios incluidos, sin buscar fuerza parecida. Al
+activarlo, "MO sin aprender" de MEJORAS se pone en sí.

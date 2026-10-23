@@ -80,6 +80,8 @@ BACKEND_SRCS += src/3ds_difficulty.c
 BACKEND_SRCS += src/3ds_trainer_teams.c
 # The Nuzlocke rules (include/3ds_nuzlocke.h).
 BACKEND_SRCS += src/3ds_nuzlocke.c
+# The randomizer (include/3ds_random.h).
+BACKEND_SRCS += src/3ds_random.c
 # Local wireless play: the emulated Wireless Adapter the game's link code
 # talks to (its radio is src/3ds_local.c).
 BACKEND_SRCS += src/3ds_rfu_adapter.c

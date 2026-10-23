@@ -1,0 +1,184 @@
+Emerald 3DS difficulty: the randomizer.
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_main.c
++++ b/src/battle_main.c
+@@ -3,6 +3,7 @@
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+ #include "3ds_difficulty.h" // difficulty settings
+ #include "3ds_trainer_teams.h" // redesigned leader teams
++#include "3ds_random.h" // randomizer
+ #endif
+ #include "battle.h"
+ #include "battle_anim.h"
+@@ -2078,6 +2079,7 @@
+ #ifdef PLATFORM_3DS
+         monsCount = CtrTeams_Apply(party, monsCount, trainerNum);
+         CtrDifficulty_ApplyTrainerIvs(party, monsCount, trainerNum);
++        CtrRandom_Party(party, monsCount, trainerNum); // randomizer
+ #endif
+     }
+ 
+--- a/src/pokemon.c
++++ b/src/pokemon.c
+@@ -1,6 +1,10 @@
+ #include "global.h"
+ #ifdef PLATFORM_3DS
+ #include "3ds_nuzlocke.h" // Nuzlocke rules
++#include "3ds_random.h" // randomizer
++#define CTR_LEARN_MOVE(species, move) CtrRandom_Move(species, move)
++#else
++#define CTR_LEARN_MOVE(species, move) (move)
+ #endif
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+@@ -3095,7 +3099,7 @@
+         if (moveLevel > (level << 9))
+             break;
+ 
+-        move = (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
++        move = (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID));
+ 
+         if (GiveMoveToBoxMon(boxMon, move) == MON_HAS_MAX_MOVES)
+             DeleteFirstMoveAndGiveMoveToBoxMon(boxMon, move);
+@@ -3126,7 +3130,7 @@
+ 
+     if ((gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_LV) == (level << 9))
+     {
+-        gMoveToLearn = (gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_ID);
++        gMoveToLearn = (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_ID));
+         sLearningMoveTableID++;
+         retVal = GiveMoveToMon(mon, gMoveToLearn);
+     }
+@@ -4614,6 +4618,9 @@
+     else
+         gLastUsedAbility = gSpeciesInfo[species].abilities[0];
+ 
++#ifdef PLATFORM_3DS
++    gLastUsedAbility = CtrRandom_Ability(species, abilityNum, gLastUsedAbility); // randomizer
++#endif
+     return gLastUsedAbility;
+ }
+ 
+@@ -6419,16 +6426,16 @@
+ 
+         if (moveLevel <= (level << 9))
+         {
+-            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
++            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID)); j++)
+                 ;
+ 
+             if (j == MAX_MON_MOVES)
+             {
+-                for (k = 0; k < numMoves && moves[k] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); k++)
++                for (k = 0; k < numMoves && moves[k] != (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID)); k++)
+                     ;
+ 
+                 if (k == numMoves)
+-                    moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
++                    moves[numMoves++] = CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
+             }
+         }
+     }
+@@ -6442,7 +6449,7 @@
+     int i;
+ 
+     for (i = 0; i < MAX_LEVEL_UP_MOVES && gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
+-         moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
++         moves[numMoves++] = CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
+ 
+      return numMoves;
+ }
+@@ -6473,16 +6480,16 @@
+ 
+         if (moveLevel <= (level << 9))
+         {
+-            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
++            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID)); j++)
+                 ;
+ 
+             if (j == MAX_MON_MOVES)
+             {
+-                for (k = 0; k < numMoves && moves[k] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); k++)
++                for (k = 0; k < numMoves && moves[k] != (CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID)); k++)
+                     ;
+ 
+                 if (k == numMoves)
+-                    moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
++                    moves[numMoves++] = CTR_LEARN_MOVE(species, gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
+             }
+         }
+     }
+--- a/src/wild_encounter.c
++++ b/src/wild_encounter.c
+@@ -2,6 +2,7 @@
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+ #include "3ds_encounters.h"
++#include "3ds_random.h" // randomizer
+ #endif
+ #include "wild_encounter.h"
+ #include "pokemon.h"
+@@ -395,6 +396,9 @@
+ {
+     bool32 checkCuteCharm;
+ 
++#ifdef PLATFORM_3DS
++    species = CtrRandom_Wild(species); // randomizer
++#endif
+     ZeroEnemyPartyMons();
+     checkCuteCharm = TRUE;
+ 
+--- a/src/scrcmd.c
++++ b/src/scrcmd.c
+@@ -1,6 +1,7 @@
+ #include "global.h"
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
++#include "3ds_random.h" // randomizer
+ #endif
+ #include "frontier_util.h"
+ #include "battle_setup.h"
+@@ -1787,6 +1788,9 @@
+     u32 unkParam2 = ScriptReadWord(ctx);
+     u8 unkParam3 = ScriptReadByte(ctx);
+ 
++#ifdef PLATFORM_3DS
++    species = CtrRandom_Gift(species); // randomizer
++#endif
+     gSpecialVar_Result = ScriptGiveMon(species, level, item, unkParam1, unkParam2, unkParam3);
+     return FALSE;
+ }
+@@ -2020,6 +2024,9 @@
+     u8 level = ScriptReadByte(ctx);
+     u16 item = ScriptReadHalfword(ctx);
+ 
++#ifdef PLATFORM_3DS
++    species = CtrRandom_Gift(species); // randomizer
++#endif
+     CreateScriptedWildMon(species, level, item);
+     return FALSE;
+ }
+--- a/src/starter_choose.c
++++ b/src/starter_choose.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_random.h" // randomizer
++#endif
+ #include "bg.h"
+ #include "data.h"
+ #include "decompress.h"
+@@ -356,7 +359,11 @@
+ {
+     if (chosenStarterId > STARTER_MON_COUNT)
+         chosenStarterId = 0;
++#ifdef PLATFORM_3DS
++    return CtrRandom_Starter(sStarterMon[chosenStarterId]); // randomizer
++#else
+     return sStarterMon[chosenStarterId];
++#endif
+ }
+ 
+ static void VblankCB_StarterChoose(void)

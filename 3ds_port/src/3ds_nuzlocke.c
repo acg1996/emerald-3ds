@@ -7,6 +7,7 @@
 #include "overworld.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "random.h"
 #include "constants/species.h"
 #include "3ds_extras.h"
 #include "3ds_nuz_store.h"
@@ -21,6 +22,7 @@ struct NuzState
     u8 failed;
     u8 reserved;
     u16 deadCount;
+    u32 seed; /* the randomizer's, chosen when the run begins */
     u8 used[NUZ_AREAS / 8];
     u32 dead[NUZ_DEAD_MAX][2];
 };
@@ -112,6 +114,7 @@ void CtrNuzlocke_OnBattleEnd(bool defeated)
 void CtrNuzlocke_Reset(void)
 {
     memset(&sState, 0, sizeof(sState));
+    sState.seed = ((u32)Random() << 16) | Random();
     sCatchBlocked = FALSE;
 }
 
@@ -146,4 +149,10 @@ unsigned CtrNuzlocke_DeadCount(void)
 bool CtrNuzlocke_Failed(void)
 {
     return sState.failed;
+}
+
+uint32_t CtrNuzlocke_Seed(void)
+{
+    /* A save with none yet (it began before the run kept one) has a fixed seed. */
+    return sState.seed != 0 ? sState.seed : 0x0E3D5EEDu;
 }

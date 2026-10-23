@@ -37,5 +37,7 @@ void CtrNuzlocke_Save(const void *save, size_t size);
 unsigned CtrNuzlocke_UsedAreas(void);
 unsigned CtrNuzlocke_DeadCount(void);
 bool CtrNuzlocke_Failed(void);
+/* The run's seed, for the randomizer (3ds_random.h). */
+uint32_t CtrNuzlocke_Seed(void);
 
 #endif // CTR_NUZLOCKE_H

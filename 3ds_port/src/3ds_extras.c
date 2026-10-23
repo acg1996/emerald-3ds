@@ -11,6 +11,7 @@
 #include "3ds_daynight.h"
 #include "3ds_difficulty.h"
 #include "3ds_nuzlocke.h"
+#include "3ds_random.h"
 #include "string_util.h"
 #include "event_data.h"
 #include "pokedex.h"
@@ -248,6 +249,16 @@ static const u8 *NuzlockeStatusText(void)
 static const char *const sDiffIvScope[] = {CTR_TEXT("ORIGINAL", "ORIGINALES", "ORIGINAUX", "ORIGINALI"), CTR_TEXT("LEADERS/E4", "LÍDERES/A.MANDO", "CHEFS/CONSEIL 4", "CAPI/LEGA"), CTR_TEXT("ALL", "TODOS", "TOUS", "TUTTI")};
 static const char *const sDiffIvLevel[] = {CTR_TEXT("GOOD 25-31", "BUENOS 25-31", "BONS 25-31", "BUONI 25-31"), CTR_TEXT("PERFECT 31", "PERFECTOS 31", "PARFAITS 31", "PERFETTI 31")};
 static const char *const sDiffScope[] = {CTR_TEXT("OFF", "NO", "NON", "NO"), CTR_TEXT("LEADERS", "LÍDERES", "CHEFS", "CAPI"), CTR_TEXT("LEADERS+E4", "LÍD.+A.MANDO", "CHEFS+CONSEIL", "CAPI+LEGA")};
+static const char *const sDiffRandom[] = {CTR_TEXT("OFF", "NO", "NON", "NO"), CTR_TEXT("WILD", "SALVAJES", "SAUVAGES", "SELVATICI"), CTR_TEXT("+TRAINERS", "+ENTRENADORES", "+DRESSEURS", "+ALLENATORI"), CTR_TEXT("+LEADERS, ETC.", "+LÍDERES, ETC.", "+CHEFS, ETC.", "+CAPI, ECC."), CTR_TEXT("+ABIL./MOVES", "+HAB./ATAQUES", "+CAPAC./ATQ.", "+ABIL./MOSSE")};
+
+/* The randomizer changes what a Pokémon is: every HM then works without the
+ * move (ENHANCEMENTS), so no Pokémon the game hands out can block the way. */
+static void RandomActed(void)
+{
+    if (CtrExtras_Get("diff_random") != 0)
+        CtrSettings_SetInt("field_hms", 1);
+}
+
 static const char *const sDiffAi[] = {CTR_TEXT("ORIGINAL", "ORIGINAL", "ORIGINALE", "ORIGINALE"), CTR_TEXT("SMART: LEADERS", "MEJOR: LÍDERES", "AMÉL.: CHEFS", "MIGL.: CAPI"), CTR_TEXT("SMART: ALL", "MEJOR: TODOS", "AMÉL.: TOUS", "MIGL.: TUTTI")};
 
 const CtrExtra gCtrExtras[] =
@@ -307,6 +318,7 @@ const CtrExtra gCtrExtras[] =
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER AI", "IA ENTRENADORES", "IA DRESSEURS", "IA ALLENATORI"), "diff_ai", 3, 0, sDiffAi, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), "diff_nuzlocke", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("RANDOMIZER", "ALEATORIZADOR", "ALÉATOIRE", "RANDOMIZER"), "diff_random", 5, 0, sDiffRandom, RandomActed, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("AREAS / DEAD", "ZONAS / MUERTOS", "ZONES / MORTS", "AREE / MORTI"), "diff_nuz_state", 0, 0, NULL, NULL, NULL, NuzlockeStatusText},
     {0},
 };
