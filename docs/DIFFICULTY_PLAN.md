@@ -199,16 +199,16 @@ y un commit.
 Cada equipo se decide con el usuario, líder por líder. La tabla está en
 `3ds_port/src/3ds_trainer_teams.c` y el tope de nivel lee de ahí.
 
-**Roxanne** (control de velocidad y aguante; el as es nivel 16, así que el
-tope antes de su medalla es 16). Rollout, Garra Metal, Corte Furia y Onda
+**Roxanne** (control de velocidad y aguante; el as sigue en nivel 15, como el original, así que el
+tope antes de su medalla es 15). Rollout, Garra Metal, Corte Furia y Onda
 Trueno van por delante de lo que esas especies aprenden a esos niveles.
 
 | Pokémon | Nv | Habilidad | Naturaleza | Objeto | Movimientos |
 |---|---|---|---|---|---|
-| Geodude | 13 | Cabeza Roca | Agitada | Baya Zidra | Rollout, Rizo Defensa, Tumba Rocas, Lanzarrocas |
-| Aron | 13 | Robustez | Firme | Cinta Focus | Garra Metal, Tumba Rocas, Fortaleza, Cabezazo |
-| Anorith | 14 | Armadura Batalla | Firme | Garra Rápida | Garra Metal, Tumba Rocas, Corte Furia, Fortaleza |
-| Nosepass | 16 | Robustez | Plácida | Baya Aranja | Bloqueo, Tumba Rocas, Onda Trueno, Fortaleza |
+| Geodude | 12 | Cabeza Roca | Agitada | Baya Zidra | Rollout, Rizo Defensa, Tumba Rocas, Lanzarrocas |
+| Aron | 12 | Robustez | Firme | Cinta Focus | Garra Metal, Tumba Rocas, Fortaleza, Cabezazo |
+| Anorith | 13 | Armadura Batalla | Firme | Garra Rápida | Garra Metal, Tumba Rocas, Corte Furia, Fortaleza |
+| Nosepass | 15 | Robustez | Plácida | Baya Aranja | Bloqueo, Tumba Rocas, Onda Trueno, Fortaleza |
 
 Todos con IV 20 y 40 EVs en dos estadísticas, mientras el ajuste de IVs sea
 "originales". Pendiente: sus revanchas (D5).
