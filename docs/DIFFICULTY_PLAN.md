@@ -426,8 +426,9 @@ activarlo, "MO sin aprender" de MEJORAS se pone en sí.
 ## Mejora de IV (implementada)
 
 Opción `diff_iv_boost` (No/Sí) de la pestaña DIFIC. Cada líder de gimnasio
-derrotado (8) y cada uno de los cinco combates contra el rival (Ruta 103,
-Petalia, Ruta 110, Ruta 119 y Lilycove) dan **una mejora**, hasta 13. Lo
+derrotado (8), cada uno de los cinco combates contra el rival (Ruta 103,
+Petalia, Ruta 110, Ruta 119 y Lilycove) y los dos combates contra Blasco
+(Ciudad Mauville y Calle Victoria) dan **una mejora**, hasta 15. Lo
 ganado se lee de las flags de entrenador que el juego ya guarda, sin enganches
 en los combates; solo lo gastado se guarda, con el estado de la partida.
 Una mejora pone **un IV de un Pokémon del equipo a 31**. Se gasta en la

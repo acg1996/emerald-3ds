@@ -19,6 +19,8 @@ static const u16 sLeaders[] =
 {
     TRAINER_ROXANNE_1, TRAINER_BRAWLY_1, TRAINER_WATTSON_1, TRAINER_FLANNERY_1,
     TRAINER_NORMAN_1, TRAINER_WINONA_1, TRAINER_TATE_AND_LIZA_1, TRAINER_JUAN_1,
+    /* Wally, in Mauville and in Victory Road. */
+    TRAINER_WALLY_MAUVILLE, TRAINER_WALLY_VR_1,
 };
 
 /* One battle of the rival: Brendan or May, with whichever starter was chosen. */

@@ -2,8 +2,9 @@
 #define CTR_IVBOOST_H
 
 /*
- * The IV boost (diff_iv_boost): winning against a gym leader, and against the
- * rival in each of his five battles, earns a boost that sets one IV of one
+ * The IV boost (diff_iv_boost): winning against a gym leader, against the
+ * rival in each of his five battles, and against Wally in Mauville and in
+ * Victory Road, earns a boost that sets one IV of one
  * of the player's Pokémon to 31. What was earned is told by the trainer
  * flags the game already keeps, so no battle needs a hook; only what was
  * spent is kept, with the run's state (3ds_nuzlocke.h).

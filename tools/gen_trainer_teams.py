@@ -178,6 +178,19 @@ t("POLITOED", "POLITOED", 0, "BOLD", "LEFTOVERS", ["SURF", "ICE_BEAM", "HYPNOSIS
 t("SUICUNE", "SUICUNE", 0, "BOLD", "LEFTOVERS", ["SURF", "ICE_BEAM", "CALM_MIND", "REST"], ("hp", "def"))
 t("GROUDON", "GROUDON", 0, "ADAMANT", "LEFTOVERS", ["EARTHQUAKE", "ROCK_SLIDE", "FIRE_BLAST", "SWORDS_DANCE"], ("hp", "atk"))
 
+# --- Wally ---------------------------------------------------------------------
+t("SKITTY", "SKITTY", 0, "JOLLY", "ORAN_BERRY", ["FAKE_OUT", "ATTRACT", "DOUBLE_SLAP", "SING"], ("hp", "spe"))
+t("DELCATTY", "DELCATTY", 0, "JOLLY", "SILK_SCARF", ["DOUBLE_EDGE", "SING", "ATTRACT", "FAINT_ATTACK"], ("hp", "spe"))
+t("ROSELIA", "ROSELIA", 0, "MODEST", "MIRACLE_SEED", ["MAGICAL_LEAF", "GIGA_DRAIN", "LEECH_SEED", "TOXIC"], ("hp", "spa"))
+t("ESPEON", "ESPEON", 0, "TIMID", "BRIGHT_POWDER", ["PSYCHIC", "SHADOW_BALL", "CALM_MIND", "MORNING_SUN"], ("spe", "spa"))
+t("WALLY_GARDEVOIR", "GARDEVOIR", 1, "MODEST", "TWISTED_SPOON", ["PSYCHIC", "CALM_MIND", "FUTURE_SIGHT", "THUNDERBOLT"], ("spe", "spa"))
+t("METAGROSS", "METAGROSS", 0, "ADAMANT", "LEFTOVERS", ["METEOR_MASH", "PSYCHIC", "EARTHQUAKE", "AGILITY"], ("hp", "atk"))
+
+# --- Overworld trainers made much harder: Aaron and Hector ----------------------
+t("SHELGON", "SHELGON", 0, "IMPISH", "LEFTOVERS", ["DRAGON_CLAW", "PROTECT", "HEADBUTT", "SCARY_FACE"], ("hp", "def"))
+t("SEVIPER", "SEVIPER", 0, "TIMID", "POISON_BARB", ["GLARE", "SLUDGE_BOMB", "CRUNCH", "EARTHQUAKE"], ("spe", "spa"))
+t("ZANGOOSE", "ZANGOOSE", 0, "JOLLY", "LUM_BERRY", ["SWORDS_DANCE", "FACADE", "BRICK_BREAK", "CRUSH_CLAW"], ("atk", "spe"))
+
 # Per-team strength: (IV, EVs on each of the two key stats).
 BASE, ELITE, RIVAL_EARLY, RIVAL_MID, RIVAL_LATE = (20, 40), (25, 120), (20, 40), (22, 60), (25, 100)
 REMATCH_1, REMATCH_2, REMATCH_3, FINAL = (28, 180), (31, 252), (31, 252), (31, 252)
@@ -262,6 +275,26 @@ STRENGTH = [REMATCH_1, REMATCH_2, REMATCH_3, FINAL]
 for leader, tiers in REMATCHES.items():
     for number, (mons, power) in enumerate(zip(tiers, STRENGTH), start=2):
         team("%s_%d" % (leader, number), ["%s_%d" % (leader, number)], power, mons)
+
+# Overworld trainers: Aaron (Route 134) looks like a lone Bagon, Hector (Route 115).
+team("AARON", ["AARON"], ELITE,
+     [("SHELGON", 42), ("FLYGON", 43), ("KINGDRA", 44), ("DRAGONITE", 45), ("SALAMENCE", 46)])
+team("HECTOR", ["HECTOR"], RIVAL_MID,
+     [("SEVIPER", 29), ("ZANGOOSE", 29), ("SNEASEL", 30), ("ABSOL", 31)])
+
+# Wally: Mauville, then Victory Road and its four rematches. Ralts is his ace
+# in Mauville; the last rematch is level 100 like the leaders'.
+team("WALLY_MAUVILLE", ["WALLY_MAUVILLE"], BASE, [("SKITTY", 16), ("SWABLU", 17), ("ROSELIA", 18), ("RALTS", 19)])
+team("WALLY_VR_1", ["WALLY_VR_1"], RIVAL_LATE,
+     [("ROSELIA", 44), ("DELCATTY", 44), ("MAGNETON", 44), ("ALTARIA", 45), ("ESPEON", 45), ("WALLY_GARDEVOIR", 47)])
+team("WALLY_VR_2", ["WALLY_VR_2"], REMATCH_1,
+     [("ROSELIA", 48), ("DELCATTY", 48), ("MAGNETON", 48), ("ALTARIA", 49), ("ESPEON", 49), ("WALLY_GARDEVOIR", 51)])
+team("WALLY_VR_3", ["WALLY_VR_3"], REMATCH_2,
+     [("ROSELIA", 53), ("DELCATTY", 53), ("MAGNETON", 53), ("ALTARIA", 54), ("ESPEON", 54), ("WALLY_GARDEVOIR", 56)])
+team("WALLY_VR_4", ["WALLY_VR_4"], REMATCH_3,
+     [("ROSELIA", 58), ("DELCATTY", 58), ("METAGROSS", 59), ("ALTARIA", 59), ("ESPEON", 59), ("WALLY_GARDEVOIR", 61)])
+team("WALLY_VR_5", ["WALLY_VR_5"], FINAL,
+     [("ROSELIA", 100), ("DELCATTY", 100), ("METAGROSS", 100), ("ALTARIA", 100), ("ESPEON", 100), ("WALLY_GARDEVOIR", 100)])
 
 # The rival (Brendan or May: the same team), by the player's starter.
 # TREECKO: the rival has Torchic; MUDKIP: Treecko; TORCHIC: Mudkip.
