@@ -9,6 +9,8 @@
 #include "3ds_extras.h"
 #include "3ds_platform.h"
 #include "3ds_daynight.h"
+#include "3ds_difficulty.h"
+#include "string_util.h"
 #include "event_data.h"
 #include "pokedex.h"
 #include "pokemon.h"
@@ -197,6 +199,25 @@ static const u8 *SpeedText(void)
     return text;
 }
 
+/* The level cap now in force (CtrDifficulty_LevelCap): its level, or a dash
+ * while there is none. A line to read; nothing to change. */
+static const u8 *LevelCapText(void)
+{
+    static u8 text[4];
+    uint8_t cap = CtrDifficulty_LevelCap();
+
+    if (cap == 0)
+    {
+        text[0] = CHAR_HYPHEN;
+        text[1] = EOS;
+    }
+    else
+    {
+        ConvertIntToDecimalStringN(text, cap, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
+    return text;
+}
+
 /*
  * Difficulty (DIFFICULTY page). Each line only stores its choice under a
  * "diff_*" key; the game code that applies it reads the key with
@@ -260,6 +281,7 @@ const CtrExtra gCtrExtras[] =
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER IVS", "IV ENTRENADORES", "IV DRESSEURS", "IV ALLENATORI"), "diff_iv_scope", 3, 0, sDiffIvScope, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV QUALITY", "CALIDAD DE IV", "QUALITÉ DES IV", "QUALITÀ IV"), "diff_iv_level", 2, 0, sDiffIvLevel, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("LEVEL CAP", "TOPE DE NIVEL", "NIVEAU MAX", "LIV. MASSIMO"), "diff_level_cap", 3, 0, sDiffScope, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("CURRENT CAP", "TOPE ACTUAL", "NIVEAU MAX ACT.", "LIV. MAX ATTUALE"), "diff_cap_now", 0, 0, NULL, NULL, NULL, LevelCapText},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER AI", "IA ENTRENADORES", "IA DRESSEURS", "IA ALLENATORI"), "diff_ai", 3, 0, sDiffAi, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
     {0},
