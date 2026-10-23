@@ -83,7 +83,7 @@ Una página nueva en OPTIONS con estas opciones (cada una es una clave en
   `gTrainers`. Así el tope sigue solo al rediseño de líderes, sin tablas
   duplicadas que mantener.
 - **Orden de líderes:** Roxanne, Brawly, Wattson, Flannery, Norman, Winona,
-  Tate y Liza, Wallace. Se sabe cuál toca por las medallas conseguidas.
+  Tate y Liza, Juan. Se sabe cuál toca por las medallas conseguidas.
 - **Alto Mando:** el tope pasa a ser el Pokémon más fuerte del **siguiente
   miembro** no derrotado (Sidney, Phoebe, Glacia y Drake) y, por último, la campeona o el campeón Wallace, usando las
   flags de derrotado de cada uno. Si resultara frágil, el plan B es usar solo
@@ -163,7 +163,7 @@ Puntos delicados:
 2. **IVs:** el cambio más pequeño; sirve para validar todo el ciclo.
 3. **Level cap:** `Cmd_getexp`, Caramelo Raro y tope por medallas.
 4. **IA mejorada.**
-5. **Rediseño de líderes** (de Roxanne a Wallace) y después Alto Mando.
+5. **Rediseño de líderes** (de Roxanne a Juan) y después Alto Mando.
 6. **Aleatorizador**, modos 1 a 4 en orden.
 
 Cada fase termina con una compilación, una prueba (emulador Azahar o 3DS real)
