@@ -75,6 +75,18 @@ def fetch(tree: Path, repo: str, commit: str) -> None:
     run(["git", "checkout", "-q", "--force", "--detach", commit], cwd=tree)
 
 
+def apply_difficulty_patches(tree: Path) -> None:
+    """The difficulty hooks go on after the localization: battle_main.c and
+    other files they touch are fingerprinted by the localizers, which refuse
+    a tree that differs from the pinned patched one. A patch already in the
+    tree is skipped, so a re-run with nothing to redo keeps working."""
+    for patch in sorted((ROOT / "patches" / "difficulty").glob("*.patch")):
+        applied = subprocess.run(["git", "apply", "--check", "-R", "--whitespace=nowarn", patch],
+                                 cwd=tree, capture_output=True).returncode == 0
+        if not applied:
+            run(["git", "apply", "--whitespace=nowarn", patch], cwd=tree)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", type=Path, default=ROOT / "build" / "upstream")
@@ -166,6 +178,7 @@ def main() -> int:
     if locale:
         run([args.python, ROOT / "tools" / locale[2], "--tree", tree,
              "--rom", locale[1].resolve()])
+    apply_difficulty_patches(tree)
     if args.make:
         run(["make", "-C", "3ds_port", "-j%d" % args.jobs, "PYTHON=%s" % args.python], cwd=tree)
     return 0

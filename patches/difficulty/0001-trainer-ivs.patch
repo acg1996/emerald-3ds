@@ -1,0 +1,25 @@
+Emerald 3DS difficulty: trainer IVs (CreateNPCTrainerParty).
+
+Applied by tools/bootstrap.py after the localization: battle_main.c is
+fingerprinted by tools/localize_spanish.py and the other localizers.
+
+--- a/src/battle_main.c
++++ b/src/battle_main.c
+@@ -1,6 +1,7 @@
+ #include "global.h"
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
++#include "3ds_difficulty.h" // difficulty settings
+ #endif
+ #include "battle.h"
+ #include "battle_anim.h"
+@@ -2073,6 +2074,9 @@
+         }
+ 
+         gBattleTypeFlags |= gTrainers[trainerNum].doubleBattle;
++#ifdef PLATFORM_3DS
++        CtrDifficulty_ApplyTrainerIvs(party, monsCount, trainerNum);
++#endif
+     }
+ 
+     return gTrainers[trainerNum].partySize;
