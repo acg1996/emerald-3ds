@@ -191,6 +191,11 @@ t("SHELGON", "SHELGON", 0, "IMPISH", "LEFTOVERS", ["DRAGON_CLAW", "PROTECT", "HE
 t("SEVIPER", "SEVIPER", 0, "TIMID", "POISON_BARB", ["GLARE", "SLUDGE_BOMB", "CRUNCH", "EARTHQUAKE"], ("spe", "spa"))
 t("ZANGOOSE", "ZANGOOSE", 0, "JOLLY", "LUM_BERRY", ["SWORDS_DANCE", "FACADE", "BRICK_BREAK", "CRUSH_CLAW"], ("atk", "spe"))
 
+# --- Team Aqua and Team Magma ---------------------------------------------------
+t("GOLBAT", "GOLBAT", 0, "JOLLY", "ORAN_BERRY", ["WING_ATTACK", "CONFUSE_RAY", "LEECH_LIFE", "TOXIC"], ("hp", "spe"))
+t("CROBAT", "CROBAT", 0, "JOLLY", "SHARP_BEAK", ["AERIAL_ACE", "SLUDGE_BOMB", "CONFUSE_RAY", "TOXIC"], ("spe", "atk"))
+t("MUK", "MUK", 0, "IMPISH", "LEFTOVERS", ["SLUDGE_BOMB", "EARTHQUAKE", "SHADOW_BALL", "TOXIC"], ("hp", "def"))
+
 # Per-team strength: (IV, EVs on each of the two key stats).
 BASE, ELITE, RIVAL_EARLY, RIVAL_MID, RIVAL_LATE = (20, 40), (25, 120), (20, 40), (22, 60), (25, 100)
 REMATCH_1, REMATCH_2, REMATCH_3, FINAL = (28, 180), (31, 252), (31, 252), (31, 252)
@@ -275,6 +280,30 @@ STRENGTH = [REMATCH_1, REMATCH_2, REMATCH_3, FINAL]
 for leader, tiers in REMATCHES.items():
     for number, (mons, power) in enumerate(zip(tiers, STRENGTH), start=2):
         team("%s_%d" % (leader, number), ["%s_%d" % (leader, number)], power, mons)
+
+# Team Magma: Camerupt is the ace. Mossdeep is a double battle with Steven.
+team("MAXIE_MT_CHIMNEY", ["MAXIE_MT_CHIMNEY"], BASE,
+     [("MIGHTYENA", 25), ("GOLBAT", 26), ("NUMEL", 26), ("CAMERUPT", 28)])
+team("TABITHA_MT_CHIMNEY", ["TABITHA_MT_CHIMNEY"], BASE,
+     [("NUMEL", 23), ("MIGHTYENA", 23), ("GOLBAT", 24), ("NUMEL", 25)])
+team("MAXIE_MAGMA_HIDEOUT", ["MAXIE_MAGMA_HIDEOUT"], RIVAL_LATE,
+     [("MIGHTYENA", 38), ("CROBAT", 39), ("TORKOAL", 39), ("HOUNDOOM", 40), ("CAMERUPT", 41)])
+team("TABITHA_MAGMA_HIDEOUT", ["TABITHA_MAGMA_HIDEOUT"], RIVAL_MID,
+     [("MIGHTYENA", 34), ("CROBAT", 35), ("HOUNDOOM", 35), ("CAMERUPT", 36)])
+team("MAXIE_MOSSDEEP", ["MAXIE_MOSSDEEP"], ELITE,
+     [("MIGHTYENA", 43), ("CROBAT", 44), ("HOUNDOOM", 44), ("TORKOAL", 44), ("CAMERUPT", 46)])
+team("TABITHA_MOSSDEEP", ["TABITHA_MOSSDEEP"], RIVAL_LATE,
+     [("MIGHTYENA", 41), ("CROBAT", 42), ("HOUNDOOM", 42), ("CAMERUPT", 43)])
+
+# Team Aqua: Sharpedo is the ace.
+team("SHELLY_WEATHER_INSTITUTE", ["SHELLY_WEATHER_INSTITUTE"], RIVAL_MID,
+     [("MIGHTYENA", 29), ("GOLBAT", 29), ("TENTACRUEL", 30), ("SHARPEDO", 31)])
+team("MATT", ["MATT"], RIVAL_MID,
+     [("MIGHTYENA", 35), ("CROBAT", 35), ("TENTACRUEL", 36), ("SHARPEDO", 37)])
+team("SHELLY_SEAFLOOR_CAVERN", ["SHELLY_SEAFLOOR_CAVERN"], RIVAL_LATE,
+     [("MIGHTYENA", 40), ("CROBAT", 40), ("TENTACRUEL", 41), ("SHARPEDO", 43)])
+team("ARCHIE", ["ARCHIE"], ELITE,
+     [("MIGHTYENA", 43), ("CROBAT", 44), ("MUK", 44), ("GYARADOS", 45), ("TENTACRUEL", 45), ("SHARPEDO", 46)])
 
 # Overworld trainers: Aaron (Route 134) looks like a lone Bagon, Hector (Route 115).
 team("AARON", ["AARON"], ELITE,
