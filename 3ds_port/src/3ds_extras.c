@@ -12,6 +12,7 @@
 #include "3ds_difficulty.h"
 #include "3ds_nuzlocke.h"
 #include "3ds_random.h"
+#include "3ds_ivboost.h"
 #include "string_util.h"
 #include "event_data.h"
 #include "pokedex.h"
@@ -259,6 +260,90 @@ static void RandomActed(void)
         CtrSettings_SetInt("field_hms", 1);
 }
 
+/*
+ * IV boost (DIFFICULTY): the boosts earned and left, and a screen of its own to
+ * spend one: a Pokémon of the party, one of its stats, and APPLY sets that IV
+ * to 31 (include/3ds_ivboost.h).
+ */
+static const char *const sIvStats[] = {CTR_TEXT("HP", "PS", "PV", "PS"), CTR_TEXT("ATTACK", "ATAQUE", "ATTAQUE", "ATTACCO"), CTR_TEXT("DEFENSE", "DEFENSA", "DÉFENSE", "DIFESA"), CTR_TEXT("SPEED", "VELOCIDAD", "VITESSE", "VELOCITÀ"), CTR_TEXT("SP. ATK", "AT. ESP.", "ATQ. SPÉ.", "ATT. SP."), CTR_TEXT("SP. DEF", "DEF. ESP.", "DÉF. SPÉ.", "DIF. SP.")};
+static const char *const sIvApplyText[] = {CTR_TEXT("TAP TO APPLY", "TOCA PARA APLICAR", "APPLIQUER", "APPLICA")};
+static const char *const sIvBackText[] = {CTR_TEXT("BACK TO DIFFICULTY", "VOLVER A DIFICULTAD", "RETOUR", "INDIETRO")};
+
+/* The chosen party slot, or the next with a Pokémon when that one has none. */
+static u8 IvSlot(void)
+{
+    int slot = CtrSettings_GetInt("ivb_slot", 0);
+
+    if (slot < 0 || slot >= PARTY_SIZE)
+        slot = 0;
+    if (CtrIvBoost_Current(slot, 0) < 0)
+        slot = CtrIvBoost_NextSlot(slot, 1);
+    return slot;
+}
+
+static u8 IvStat(void)
+{
+    int stat = CtrSettings_GetInt("ivb_stat", 0);
+
+    return stat >= 0 && stat < (int)ARRAY_COUNT(sIvStats) ? stat : 0;
+}
+
+static void IvSlotStep(int direction)
+{
+    CtrSettings_SetInt("ivb_slot", CtrIvBoost_NextSlot(IvSlot(), direction));
+}
+
+static const u8 *IvSlotText(void)
+{
+    return CtrIvBoost_Name(IvSlot());
+}
+
+static const u8 *IvNowText(void)
+{
+    static u8 text[4];
+    int iv = CtrIvBoost_Current(IvSlot(), IvStat());
+
+    if (iv < 0)
+    {
+        text[0] = CHAR_HYPHEN;
+        text[1] = EOS;
+    }
+    else
+    {
+        ConvertIntToDecimalStringN(text, iv, STR_CONV_MODE_LEFT_ALIGN, 2);
+    }
+    return text;
+}
+
+/* The boosts left and the most there are. */
+static const u8 *IvLeftText(void)
+{
+    static u8 text[12];
+    u8 *end = ConvertIntToDecimalStringN(text, CtrIvBoost_Available(), STR_CONV_MODE_LEFT_ALIGN, 3);
+
+    *end++ = CHAR_SLASH;
+    ConvertIntToDecimalStringN(end, CtrIvBoost_Total(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    return text;
+}
+
+static void IvOpen(void)
+{
+    CtrExtras_ShowScreen(CTR_EXTRAS_DIFFICULTY, 1);
+}
+
+static void IvBack(void)
+{
+    CtrExtras_ShowScreen(CTR_EXTRAS_DIFFICULTY, 0);
+}
+
+static void IvApply(void)
+{
+    if (CtrExtras_Get("diff_iv_boost") != 0 && CtrIvBoost_Apply(IvSlot(), IvStat()))
+        PlaySE(SE_SUCCESS);
+    else
+        PlaySE(SE_FAILURE);
+}
+
 static const char *const sDiffAi[] = {CTR_TEXT("ORIGINAL", "ORIGINAL", "ORIGINALE", "ORIGINALE"), CTR_TEXT("SMART: LEADERS", "MEJOR: LÍDERES", "AMÉL.: CHEFS", "MIGL.: CAPI"), CTR_TEXT("SMART: ALL", "MEJOR: TODOS", "AMÉL.: TOUS", "MIGL.: TUTTI")};
 
 const CtrExtra gCtrExtras[] =
@@ -319,7 +404,14 @@ const CtrExtra gCtrExtras[] =
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), "diff_nuzlocke", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("RANDOMIZER", "ALEATORIZADOR", "ALÉATOIRE", "RANDOMIZER"), "diff_random", 5, 0, sDiffRandom, RandomActed, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV BOOST", "MEJORA DE IV", "BOOST D'IV", "BOOST IV"), "diff_iv_boost", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV BOOSTS", "MEJORAS DE IV", "BOOSTS D'IV", "BOOST IV"), "ivb_open", 0, 0, NULL, IvOpen, NULL, IvLeftText},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("AREAS / DEAD", "ZONAS / MUERTOS", "ZONES / MORTS", "AREE / MORTI"), "diff_nuz_state", 0, 0, NULL, NULL, NULL, NuzlockeStatusText},
+    {CTR_EXTRAS_SCREEN(CTR_EXTRAS_DIFFICULTY, 1), CTR_TEXT("IV BOOST", "MEJORA DE IV", "BOOST D'IV", "BOOST IV"), "ivb_back", 0, 0, sIvBackText, IvBack, NULL, NULL},
+    {CTR_EXTRAS_SCREEN(CTR_EXTRAS_DIFFICULTY, 1), CTR_TEXT("POKEMON", "POKéMON", "POKÉMON", "POKéMON"), "ivb_slot", 0, 0, NULL, NULL, IvSlotStep, IvSlotText},
+    {CTR_EXTRAS_SCREEN(CTR_EXTRAS_DIFFICULTY, 1), CTR_TEXT("STAT", "ESTADÍSTICA", "STATISTIQUE", "STATISTICA"), "ivb_stat", 6, 0, sIvStats, NULL, NULL, NULL},
+    {CTR_EXTRAS_SCREEN(CTR_EXTRAS_DIFFICULTY, 1), CTR_TEXT("CURRENT IV", "IV ACTUAL", "IV ACTUEL", "IV ATTUALE"), "ivb_now", 0, 0, NULL, NULL, NULL, IvNowText},
+    {CTR_EXTRAS_SCREEN(CTR_EXTRAS_DIFFICULTY, 1), CTR_TEXT("SET TO 31", "PONER A 31", "METTRE À 31", "METTI A 31"), "ivb_apply", 0, 0, sIvApplyText, IvApply, NULL, NULL},
     {0},
 };
 

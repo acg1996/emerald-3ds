@@ -82,6 +82,8 @@ BACKEND_SRCS += src/3ds_trainer_teams.c
 BACKEND_SRCS += src/3ds_nuzlocke.c
 # The randomizer (include/3ds_random.h).
 BACKEND_SRCS += src/3ds_random.c
+# The IV boost earned from leaders and the rival (include/3ds_ivboost.h).
+BACKEND_SRCS += src/3ds_ivboost.c
 # Local wireless play: the emulated Wireless Adapter the game's link code
 # talks to (its radio is src/3ds_local.c).
 BACKEND_SRCS += src/3ds_rfu_adapter.c

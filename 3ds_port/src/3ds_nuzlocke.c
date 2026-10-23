@@ -20,7 +20,7 @@
 struct NuzState
 {
     u8 failed;
-    u8 reserved;
+    u8 ivSpent; /* IV boosts used (3ds_ivboost.h) */
     u16 deadCount;
     u32 seed; /* the randomizer's, chosen when the run begins */
     u8 used[NUZ_AREAS / 8];
@@ -155,4 +155,15 @@ uint32_t CtrNuzlocke_Seed(void)
 {
     /* A save with none yet (it began before the run kept one) has a fixed seed. */
     return sState.seed != 0 ? sState.seed : 0x0E3D5EEDu;
+}
+
+unsigned CtrNuzlocke_IvSpent(void)
+{
+    return sState.ivSpent;
+}
+
+void CtrNuzlocke_SpendIv(void)
+{
+    if (sState.ivSpent < 255)
+        sState.ivSpent++;
 }

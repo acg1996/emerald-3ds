@@ -39,5 +39,8 @@ unsigned CtrNuzlocke_DeadCount(void);
 bool CtrNuzlocke_Failed(void);
 /* The run's seed, for the randomizer (3ds_random.h). */
 uint32_t CtrNuzlocke_Seed(void);
+/* The IV boosts used so far, and one more used (3ds_ivboost.h). */
+unsigned CtrNuzlocke_IvSpent(void);
+void CtrNuzlocke_SpendIv(void);
 
 #endif // CTR_NUZLOCKE_H
