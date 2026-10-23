@@ -78,6 +78,8 @@ BACKEND_SRCS += src/3ds_extras.c
 BACKEND_SRCS += src/3ds_difficulty.c
 # The leaders' and Elite Four's redesigned teams (include/3ds_trainer_teams.h).
 BACKEND_SRCS += src/3ds_trainer_teams.c
+# The Nuzlocke rules (include/3ds_nuzlocke.h).
+BACKEND_SRCS += src/3ds_nuzlocke.c
 # Local wireless play: the emulated Wireless Adapter the game's link code
 # talks to (its radio is src/3ds_local.c).
 BACKEND_SRCS += src/3ds_rfu_adapter.c

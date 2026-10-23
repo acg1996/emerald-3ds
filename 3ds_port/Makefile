@@ -51,6 +51,8 @@ SOURCES += src/3ds_video.c src/3ds_video_decode.c src/3ds_bottom_screen.c
 SOURCES += src/3ds_local.c
 SOURCES += src/3ds_daynight.c
 SOURCES += src/3ds_clock_store.c
+# The Nuzlocke run's state next to the save (include/3ds_nuz_store.h).
+SOURCES += src/3ds_nuz_store.c
 SOURCES += src/3ds_encounters.c
 # The part of the overworld on screen, for the map objects.
 SOURCES += src/3ds_field_view.c

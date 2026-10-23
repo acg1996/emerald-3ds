@@ -1,0 +1,196 @@
+Emerald 3DS difficulty: the Nuzlocke rules.
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_setup.c
++++ b/src/battle_setup.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_nuzlocke.h" // Nuzlocke rules
++#endif
+ #ifdef PORT_BRIDGE
+ #include "port_platform.h"
+ #endif
+@@ -409,6 +412,9 @@
+     StopPlayerAvatar();
+     gMain.savedCallback = CB2_EndWildBattle;
+     gBattleTypeFlags = 0;
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_OnWildBattle(); // Nuzlocke: one catch per area
++#endif
+     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
+     {
+         VarSet(VAR_TEMP_PLAYING_PYRAMID_MUSIC, 0);
+@@ -604,6 +610,9 @@
+ 
+ static void CB2_EndWildBattle(void)
+ {
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_OnBattleEnd(IsPlayerDefeated(gBattleOutcome));
++#endif
+     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
+     ResetOamRange(0, 128);
+ 
+@@ -620,6 +629,9 @@
+ 
+ static void CB2_EndScriptedWildBattle(void)
+ {
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_OnBattleEnd(IsPlayerDefeated(gBattleOutcome));
++#endif
+     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
+     ResetOamRange(0, 128);
+ 
+@@ -1347,6 +1359,9 @@
+ 
+ static void CB2_EndTrainerBattle(void)
+ {
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_OnBattleEnd(IsPlayerDefeated(gBattleOutcome));
++#endif
+     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
+     {
+         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+--- a/src/battle_script_commands.c
++++ b/src/battle_script_commands.c
+@@ -2,6 +2,7 @@
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+ #include "3ds_difficulty.h" // difficulty settings
++#include "3ds_nuzlocke.h" // Nuzlocke rules
+ #endif
+ #include "battle.h"
+ #include "battle_message.h"
+@@ -10034,7 +10035,11 @@
+     gActiveBattler = gBattlerAttacker;
+     gBattlerTarget = BATTLE_OPPOSITE(gBattlerAttacker);
+ 
+-    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
++    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER
++#ifdef PLATFORM_3DS
++     || !CtrNuzlocke_CanCatch() // Nuzlocke: the area is spent
++#endif
++        )
+     {
+         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
+         MarkBattlerForControllerExec(gActiveBattler);
+--- a/src/script_pokemon_util.c
++++ b/src/script_pokemon_util.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_nuzlocke.h" // Nuzlocke rules
++#endif
+ #include "battle.h"
+ #include "battle_gfx_sfx_util.h"
+ #include "berry.h"
+@@ -33,9 +36,16 @@
+     u8 ppBonuses;
+     u8 arg[4];
+ 
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_ScanParty(); // Nuzlocke: the fainted are dead before the heal
++#endif
+     // restore HP.
+     for(i = 0; i < gPlayerPartyCount; i++)
+     {
++#ifdef PLATFORM_3DS
++        if (CtrNuzlocke_IsDead(&gPlayerParty[i]))
++            continue;
++#endif
+         u16 maxHP = GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP);
+         arg[0] = maxHP;
+         arg[1] = maxHP >> 8;
+--- a/src/pokemon.c
++++ b/src/pokemon.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_nuzlocke.h" // Nuzlocke rules
++#endif
+ #ifdef PLATFORM_3DS
+ #include "3ds_extras.h" // optional settings (OPTIONS pages)
+ #endif
+@@ -4832,6 +4835,10 @@
+     s8 evChange;
+     u16 evCount;
+ 
++#ifdef PLATFORM_3DS
++    if (CtrNuzlocke_IsDead(mon)) // Nuzlocke: a dead Pokemon takes no item
++        return TRUE;
++#endif
+     // Get item hold effect
+     heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
+     if (heldItem == ITEM_ENIGMA_BERRY)
+--- a/src/new_game.c
++++ b/src/new_game.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_nuzlocke.h" // Nuzlocke rules
++#endif
+ #include "new_game.h"
+ #include "random.h"
+ #include "pokemon.h"
+@@ -159,6 +162,9 @@
+ 
+ void NewGameInitData(void)
+ {
++#ifdef PLATFORM_3DS
++    CtrNuzlocke_Reset(); // a new run
++#endif
+     if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
+         RtcReset();
+ 
+--- a/src/save.c
++++ b/src/save.c
+@@ -16,6 +16,7 @@
+ #ifdef PLATFORM_3DS
+ #include "clock.h"
+ #include "3ds_clock_store.h"
++#include "3ds_nuzlocke.h"
+ #include "3ds_daynight.h"
+ #endif
+ 
+@@ -789,7 +790,10 @@
+     gTrainerHillVBlankCounter = backupVar;
+ #ifdef PLATFORM_3DS
+     if (!gDamagedSaveSectors)
++    {
+         CtrClockStore_Save(FLASH_BASE, sizeof(FLASH_BASE));
++        CtrNuzlocke_Save(FLASH_BASE, sizeof(FLASH_BASE));
++    }
+ #endif
+     return 0;
+ }
+@@ -860,7 +864,10 @@
+         DoSaveFailedScreen(SAVE_NORMAL);
+ #ifdef PLATFORM_3DS
+     if (!gDamagedSaveSectors)
++    {
+         CtrClockStore_Save(FLASH_BASE, sizeof(FLASH_BASE));
++        CtrNuzlocke_Save(FLASH_BASE, sizeof(FLASH_BASE));
++    }
+ #endif
+     return FALSE;
+ }
+@@ -911,7 +918,10 @@
+ 
+ #ifdef PLATFORM_3DS
+     if (finished && !gDamagedSaveSectors)
++    {
+         CtrClockStore_Save(FLASH_BASE, sizeof(FLASH_BASE));
++        CtrNuzlocke_Save(FLASH_BASE, sizeof(FLASH_BASE));
++    }
+ #endif
+     return finished;
+ }
+@@ -936,6 +946,7 @@
+         gSaveFileStatus = status;
+ #ifdef PLATFORM_3DS
+         CtrClockStore_Load(FLASH_BASE, sizeof(FLASH_BASE));
++        CtrNuzlocke_Load(FLASH_BASE, sizeof(FLASH_BASE));
+ #endif
+         gGameContinueCallback = 0;
+         break;

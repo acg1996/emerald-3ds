@@ -10,6 +10,7 @@
 #include "3ds_platform.h"
 #include "3ds_daynight.h"
 #include "3ds_difficulty.h"
+#include "3ds_nuzlocke.h"
 #include "string_util.h"
 #include "event_data.h"
 #include "pokedex.h"
@@ -218,6 +219,27 @@ static const u8 *LevelCapText(void)
     return text;
 }
 
+/* The Nuzlocke run: the areas used and the dead, or FAIL once it is lost. */
+static const u8 *NuzlockeStatusText(void)
+{
+    static u8 text[16];
+    u8 *end = text;
+
+    if (CtrNuzlocke_Failed())
+    {
+        *end++ = CHAR_F;
+        *end++ = CHAR_A;
+        *end++ = CHAR_I;
+        *end++ = CHAR_L;
+        *end = EOS;
+        return text;
+    }
+    end = ConvertIntToDecimalStringN(end, CtrNuzlocke_UsedAreas(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    *end++ = CHAR_SLASH;
+    ConvertIntToDecimalStringN(end, CtrNuzlocke_DeadCount(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    return text;
+}
+
 /*
  * Difficulty (DIFFICULTY page). Each line only stores its choice under a
  * "diff_*" key; the game code that applies it reads the key with
@@ -284,6 +306,8 @@ const CtrExtra gCtrExtras[] =
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("CURRENT CAP", "TOPE ACTUAL", "NIVEAU MAX ACT.", "LIV. MAX ATTUALE"), "diff_cap_now", 0, 0, NULL, NULL, NULL, LevelCapText},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER AI", "IA ENTRENADORES", "IA DRESSEURS", "IA ALLENATORI"), "diff_ai", 3, 0, sDiffAi, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), "diff_nuzlocke", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("AREAS / DEAD", "ZONAS / MUERTOS", "ZONES / MORTS", "AREE / MORTI"), "diff_nuz_state", 0, 0, NULL, NULL, NULL, NuzlockeStatusText},
     {0},
 };
 
