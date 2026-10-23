@@ -215,11 +215,6 @@ static shaderProgram_s sProgram;
 static int sUniProjection = -1, sUniModelView = -1;
 static int sUniShadeTint = -1, sUniTintDiff = -1, sUniGrade = -1, sUniFog = -1;
 static int sUniDappleU = -1, sUniDappleV = -1;
-static int sUniChunkFit = -1, sUniChunkScale = -1;
-/* How far a chunk's geometry is pushed out from its centre, a fraction: its
- * edge moves a few hundredths of a pixel, more than the GPU's rounding of the
- * matrices differs by (voxel.v.pica). */
-#define VOXEL_CHUNK_OVERLAP 0.0012f
 /* The tree crowns' brightness against the rest of the art, applied once as
  * the tree texture loads (BrightenCrowns). */
 #define VOXEL_TREE_BRIGHTNESS 1.12f
@@ -2127,11 +2122,9 @@ bool CtrVoxel_Init(void)
     sUniFog = shaderInstanceGetUniformLocation(sProgram.vertexShader, "fog");
     sUniDappleU = shaderInstanceGetUniformLocation(sProgram.vertexShader, "dappleU");
     sUniDappleV = shaderInstanceGetUniformLocation(sProgram.vertexShader, "dappleV");
-    sUniChunkFit = shaderInstanceGetUniformLocation(sProgram.vertexShader, "chunkFit");
-    sUniChunkScale = shaderInstanceGetUniformLocation(sProgram.vertexShader, "chunkScale");
     if (sUniProjection < 0 || sUniModelView < 0 || sUniShadeTint < 0
      || sUniTintDiff < 0 || sUniGrade < 0 || sUniFog < 0
-     || sUniDappleU < 0 || sUniDappleV < 0 || sUniChunkFit < 0 || sUniChunkScale < 0)
+     || sUniDappleU < 0 || sUniDappleV < 0)
     {
         step = "locate shader uniforms";
         goto fail;
@@ -2355,7 +2348,6 @@ void CtrVoxel_Shutdown(void)
         sDvlb = NULL;
     }
     sUniProjection = sUniModelView = -1;
-    sUniChunkFit = sUniChunkScale = -1;
     sAtlasCapped = false;
     sMeshMapGroup = sMeshMapNum = -1;
     sReady = false;
@@ -7683,8 +7675,6 @@ void CtrVoxel_Draw(C3D_RenderTarget *target, int eye)
     CameraMatrices(&projection, &view, true, eye);
 
     C3D_BindProgram(&sProgram);
-    C3D_FVUnifSet(GPU_VERTEX_SHADER, sUniChunkFit, 0.0f, 0.0f, 0.0f, 0.0f);
-    C3D_FVUnifSet(GPU_VERTEX_SHADER, sUniChunkScale, 0.0f, 0.0f, 0.0f, 0.0f);
 
     /* VoxelGpuVertex: texcoord (2 floats), then position + shade (4 shorts). */
     attr = C3D_GetAttrInfo();
@@ -7746,10 +7736,6 @@ void CtrVoxel_Draw(C3D_RenderTarget *target, int eye)
                 continue;
 
             SetModelView(&view, sDraws[i].worldX, sDraws[i].worldZ);
-            /* The chunk pushed out from its centre: it overlaps its neighbours' edges. */
-            C3D_FVUnifSet(GPU_VERTEX_SHADER, sUniChunkFit, (chunk->gx0 + chunk->gx1) * 0.5f, 0.0f,
-                          (chunk->gz0 + chunk->gz1) * 0.5f, 0.0f);
-            C3D_FVUnifSet(GPU_VERTEX_SHADER, sUniChunkScale, VOXEL_CHUNK_OVERLAP, 0.0f, VOXEL_CHUNK_OVERLAP, 0.0f);
 #if CTR_VOXEL_LIGHTING
             if (dapples)
                 DappleUniforms(sDraws[i].worldX, sDraws[i].worldZ, 0.0f);
@@ -7769,8 +7755,6 @@ void CtrVoxel_Draw(C3D_RenderTarget *target, int eye)
             BindVertices(chunk->vram);
             C3D_DrawArrays(GPU_TRIANGLES, (int)first, (int)count);
         }
-        /* What follows is no chunk. */
-        C3D_FVUnifSet(GPU_VERTEX_SHADER, sUniChunkScale, 0.0f, 0.0f, 0.0f, 0.0f);
         if (pass == VOXEL_ATLAS_PAGES + 1u && sHaveBuildings)
             DrawStatics(&view, dapples ? &light : NULL, glowing);
     }

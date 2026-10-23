@@ -23,9 +23,6 @@
 .fvec projection[4], modelView[4]
 .fvec shadeTint, tintDiff, grade, fog
 .fvec dappleU, dappleV
-; A chunk's centre (x, z in tiles) and how far its geometry is pushed out from it
-; (a fraction); zero for anything that is not a chunk.
-.fvec chunkFit, chunkScale
 
 ; x: position scale, y: shade scale, z: 0, w: 1
 .constf ctrVoxelConst(0.001953125, 0.00006103515625, 0.0, 1.0)
@@ -44,13 +41,6 @@
 .proc main
 	mul r0.xyz, ctrVoxelConst.xxxx, inpos
 	mov r0.w,   ones
-
-	; Two chunks measure their shared edge from different matrices and, rounded
-	; by the GPU's 16-bit mantissa, can differ by a fraction of a pixel: a sliver
-	; the rasteriser misses at some camera positions (a thin black line across
-	; the screen). Pushing each chunk out from its centre makes the edges overlap.
-	add r7, -chunkFit, r0
-	mad r0, r7, chunkScale, r0
 
 	; r1 = modelView * position
 	dp4 r1.x, modelView[0], r0
