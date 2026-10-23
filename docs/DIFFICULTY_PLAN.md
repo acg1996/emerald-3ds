@@ -322,3 +322,13 @@ mantiene el nivel original, que es el tope.
 | Gengar | 49 | Levitación | Campana Concha | Hipnosis, Comesueños, Bola Sombra, Rayo |
 | Sableye | 50 | Vista Lince | Polvo Brillo | Mal de Ojo, Bola Sombra, Rayo Confuso, Desarme |
 | Dusclops | 51 | Presión | Restos | Mal de Ojo, Fuego Fatuo, Bola Sombra, Terremoto |
+
+**Glacia** (granizo; 5 Pokémon, tope 53; sin los repetidos del original)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Glalie | 50 | Fuerza Mental | Antiderretir | Granizo, Rayo Hielo, Triturar, Protección |
+| Sneasel | 50 | Vista Lince | Lupa | Danza Espada, Cuchillada, Finta, Ataque Rápido |
+| Jynx | 52 | Despiste | Baya Lum | Rayo Hielo, Psíquico, Beso Amoroso, Paz Mental |
+| Lapras | 52 | Armadura Concha | Restos | Rayo Hielo, Surf, Rayo, Rayo Confuso |
+| Walrein | 53 | Sebo | Baya Chesto | Rayo Hielo, Surf, Golpe Cuerpo, Descanso |
