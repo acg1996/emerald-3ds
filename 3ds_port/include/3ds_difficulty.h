@@ -27,4 +27,18 @@ bool CtrDifficulty_AtLevelCap(const struct Pokemon *mon);
 /* The experience it may gain: cut so that it ends no higher than the cap. */
 int32_t CtrDifficulty_ClampExp(const struct Pokemon *mon, int32_t exp);
 
+/*
+ * The trainer AI (diff_ai). Smart means this battler is a trainer's, in a battle
+ * the setting reaches: leaders and the Elite Four, or every trainer.
+ */
+bool CtrAi_IsSmart(uint8_t battler);
+/* The AI scripts a smart trainer always runs, added to its own. */
+uint32_t CtrAi_BaseFlags(void);
+/*
+ * After the AI scripts have scored the moves in a single battle: more for a
+ * move that knocks the target out or hits hard, and for a stat-raising move
+ * only when the battler is not about to be knocked out.
+ */
+void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores);
+
 #endif // CTR_DIFFICULTY_H

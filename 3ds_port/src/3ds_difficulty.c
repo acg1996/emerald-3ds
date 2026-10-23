@@ -4,9 +4,16 @@
  * tables and the Pokémon the battle built.
  */
 #include "global.h"
+#include "battle.h"
+#include "battle_anim.h"
+#include "battle_setup.h"
+#include "battle_script_commands.h"
 #include "data.h"
 #include "pokemon.h"
 #include "event_data.h"
+#include "constants/battle.h"
+#include "constants/battle_ai.h"
+#include "constants/battle_move_effects.h"
 #include "constants/flags.h"
 #include "constants/opponents.h"
 #include "constants/trainers.h"
@@ -157,4 +164,179 @@ int32_t CtrDifficulty_ClampExp(const struct Pokemon *mon, int32_t exp)
     room = (s32)gExperienceTables[gSpeciesInfo[species].growthRate][cap + 1] - 1
          - (s32)GetMonData((struct Pokemon *)mon, MON_DATA_EXP, NULL);
     return room < 0 ? 0 : (exp < room ? exp : room);
+}
+
+/*
+ * The trainer AI. A smart trainer runs the sturdy scripts and, on top of what
+ * they score, prefers a knock-out and a big hit, and raises its stats only
+ * when it is safe to (it survives the target's best move, or two of them).
+ * Like the game's own AI it reads the target's real moves.
+ */
+enum
+{
+    AI_SCOPE_ORIGINAL,
+    AI_SCOPE_LEADERS,
+    AI_SCOPE_ALL
+};
+
+#define AI_KO_BONUS 5
+#define AI_BIG_HIT_BONUS 1
+#define AI_SAFE_SETUP_BONUS 3
+#define AI_OK_SETUP_BONUS 1
+#define AI_UNSAFE_SETUP_PENALTY 4
+/* Stat stages above the default a raised stat stops at (+2). */
+#define AI_SETUP_STAGE_CAP 2
+
+/* Battles with a trainer's own AI that is not a story script: not the first
+ * battle, Wally's, a recorded or a link battle. */
+#define AI_EXCLUDED_BATTLES (BATTLE_TYPE_FIRST_BATTLE | BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_RECORDED \
+                             | BATTLE_TYPE_LINK | BATTLE_TYPE_SAFARI | BATTLE_TYPE_ROAMER)
+/* Trainers who are not in the trainer table. */
+#define AI_OWN_TRAINER_BATTLES (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_TRAINER_HILL \
+                                | BATTLE_TYPE_SECRET_BASE | BATTLE_TYPE_FACTORY)
+
+static bool8 IsLeaderOrEliteFourSafe(u16 trainerNum)
+{
+    return trainerNum < TRAINERS_COUNT && IsLeaderOrEliteFour(trainerNum);
+}
+
+bool CtrAi_IsSmart(uint8_t battler)
+{
+    int scope = CtrExtras_Get("diff_ai");
+
+    if (scope == AI_SCOPE_ORIGINAL || GetBattlerSide(battler) != B_SIDE_OPPONENT)
+        return false;
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gBattleTypeFlags & AI_EXCLUDED_BATTLES))
+        return false;
+    if (scope == AI_SCOPE_ALL)
+        return true;
+    if (gBattleTypeFlags & AI_OWN_TRAINER_BATTLES)
+        return false;
+    return IsLeaderOrEliteFourSafe(gTrainerBattleOpponent_A)
+        || ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && IsLeaderOrEliteFourSafe(gTrainerBattleOpponent_B));
+}
+
+uint32_t CtrAi_BaseFlags(void)
+{
+    return AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT | AI_SCRIPT_CHECK_VIABILITY
+         | AI_SCRIPT_SETUP_FIRST_TURN | AI_SCRIPT_HP_AWARE;
+}
+
+/* The damage a move would do, by the game's own estimate, or 0. */
+static s32 SimulatedDamage(u8 attacker, u8 defender, u16 move)
+{
+    if (move == MOVE_NONE || gBattleMoves[move].power < 2)
+        return 0;
+    gDynamicBasePower = 0;
+    gBattleStruct->dynamicMoveType = 0;
+    gBattleScripting.dmgMultiplier = 1;
+    gMoveResultFlags = 0;
+    gCritMultiplier = 1;
+    gCurrentMove = move;
+    AI_CalcDmg(attacker, defender);
+    TypeCalc(move, attacker, defender);
+    return (gMoveResultFlags & MOVE_RESULT_DOESNT_AFFECT_FOE) ? 0 : gBattleMoveDamage;
+}
+
+static s32 BestDamage(u8 attacker, u8 defender)
+{
+    s32 best = 0;
+    u8 i;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        s32 damage = SimulatedDamage(attacker, defender, gBattleMons[attacker].moves[i]);
+
+        if (damage > best)
+            best = damage;
+    }
+    return best;
+}
+
+/* Whether the move only raises the stat this returns, for the ones worth stacking. */
+static bool8 RaisedStat(u16 effect, u8 *stat)
+{
+    switch (effect)
+    {
+    case EFFECT_ATTACK_UP:
+    case EFFECT_ATTACK_UP_2:
+    case EFFECT_BULK_UP:
+    case EFFECT_DRAGON_DANCE:
+        *stat = STAT_ATK;
+        return TRUE;
+    case EFFECT_SPECIAL_ATTACK_UP:
+    case EFFECT_SPECIAL_ATTACK_UP_2:
+    case EFFECT_CALM_MIND:
+        *stat = STAT_SPATK;
+        return TRUE;
+    case EFFECT_SPEED_UP:
+    case EFFECT_SPEED_UP_2:
+        *stat = STAT_SPEED;
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+/* A move's score is a signed byte and 0 means the move is not to be chosen:
+ * raise it up to 127, lower it down to 1. */
+static void AddScore(s8 *score, int delta)
+{
+    int value = *score + delta;
+
+    *score = value < 1 ? 1 : (value > 127 ? 127 : value);
+}
+
+void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
+{
+    u16 savedMove = gCurrentMove;
+    s32 savedDamage = gBattleMoveDamage;
+    u8 savedFlags = gMoveResultFlags;
+    u16 savedPower = gDynamicBasePower;
+    u8 savedCrit = gCritMultiplier;
+    u8 savedMultiplier = gBattleScripting.dmgMultiplier;
+    u8 savedType = gBattleStruct->dynamicMoveType;
+    s32 targetHp = gBattleMons[target].hp, myHp = gBattleMons[battler].hp;
+    s32 threat;
+    bool8 canKo = FALSE;
+    s32 damage[MAX_MON_MOVES];
+    u8 i, stat;
+
+    if (!CtrAi_IsSmart(battler) || (gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+        return;
+    threat = BestDamage(target, battler);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        damage[i] = scores[i] > 0 ? SimulatedDamage(battler, target, gBattleMons[battler].moves[i]) : 0;
+        if (damage[i] >= targetHp)
+            canKo = TRUE;
+    }
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 move = gBattleMons[battler].moves[i];
+
+        if (scores[i] <= 0 || move == MOVE_NONE)
+            continue;
+        if (damage[i] >= targetHp)
+            AddScore(&scores[i], AI_KO_BONUS);
+        else if (damage[i] > 0 && damage[i] * 2 >= targetHp)
+            AddScore(&scores[i], AI_BIG_HIT_BONUS);
+        else if (RaisedStat(gBattleMoves[move].effect, &stat) && !canKo
+              && gBattleMons[battler].statStages[stat] < DEFAULT_STAT_STAGE + AI_SETUP_STAGE_CAP)
+        {
+            if (threat >= myHp)
+                AddScore(&scores[i], -AI_UNSAFE_SETUP_PENALTY);
+            else if (threat * 2 < myHp)
+                AddScore(&scores[i], AI_SAFE_SETUP_BONUS);
+            else
+                AddScore(&scores[i], AI_OK_SETUP_BONUS);
+        }
+    }
+    gCurrentMove = savedMove;
+    gBattleMoveDamage = savedDamage;
+    gMoveResultFlags = savedFlags;
+    gDynamicBasePower = savedPower;
+    gCritMultiplier = savedCrit;
+    gBattleScripting.dmgMultiplier = savedMultiplier;
+    gBattleStruct->dynamicMoveType = savedType;
 }

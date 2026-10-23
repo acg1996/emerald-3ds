@@ -1,0 +1,75 @@
+Emerald 3DS difficulty: trainer AI (flags, move scores, switching).
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_ai_script_commands.c
++++ b/src/battle_ai_script_commands.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_difficulty.h" // difficulty settings
++#endif
+ #include "battle.h"
+ #include "battle_anim.h"
+ #include "battle_ai_script_commands.h"
+@@ -381,6 +384,12 @@
+ 
+     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+         AI_THINKING_STRUCT->aiFlags |= AI_SCRIPT_DOUBLE_BATTLE; // act smart in doubles and don't attack your partner
++
++#ifdef PLATFORM_3DS
++    // Trainer AI (OPTIONS, DIFFICULTY): the sturdy scripts for a smart trainer.
++    if (CtrAi_IsSmart(sBattler_AI))
++        AI_THINKING_STRUCT->aiFlags |= CtrAi_BaseFlags();
++#endif
+ }
+ 
+ u8 BattleAI_ChooseMoveOrAction(void)
+@@ -417,6 +426,11 @@
+         AI_THINKING_STRUCT->aiLogicId++;
+         AI_THINKING_STRUCT->movesetIndex = 0;
+     }
++
++#ifdef PLATFORM_3DS
++    // Trainer AI (OPTIONS, DIFFICULTY): knock-outs and safe stat raising.
++    CtrAi_AdjustScores(sBattler_AI, gBattlerTarget, AI_THINKING_STRUCT->score);
++#endif
+ 
+     // Check special AI actions.
+     if (AI_THINKING_STRUCT->aiAction & AI_ACTION_FLEE)
+--- a/src/battle_ai_switch_items.c
++++ b/src/battle_ai_switch_items.c
+@@ -1,4 +1,7 @@
+ #include "global.h"
++#ifdef PLATFORM_3DS
++#include "3ds_difficulty.h" // difficulty settings
++#endif
+ #include "battle.h"
+ #include "battle_anim.h"
+ #include "battle_controllers.h"
+@@ -17,6 +20,14 @@
+ static bool8 FindMonWithFlagsAndSuperEffective(u8 flags, u8 moduloPercent);
+ static bool8 ShouldUseItem(void);
+ 
++#ifdef PLATFORM_3DS
++// A smart trainer (OPTIONS, DIFFICULTY) always takes the switch the game only
++// takes half or a third of the time.
++#define AI_SWITCH_ODDS(odds) (CtrAi_IsSmart(gActiveBattler) ? 1 : (odds))
++#else
++#define AI_SWITCH_ODDS(odds) (odds)
++#endif
++
+ static bool8 ShouldSwitchIfPerishSong(void)
+ {
+     if (gStatuses3[gActiveBattler] & STATUS3_PERISH_SONG
+@@ -518,8 +529,8 @@
+         return FALSE;
+     if (AreStatsRaised())
+         return FALSE;
+-    if (FindMonWithFlagsAndSuperEffective(MOVE_RESULT_DOESNT_AFFECT_FOE, 2)
+-        || FindMonWithFlagsAndSuperEffective(MOVE_RESULT_NOT_VERY_EFFECTIVE, 3))
++    if (FindMonWithFlagsAndSuperEffective(MOVE_RESULT_DOESNT_AFFECT_FOE, AI_SWITCH_ODDS(2))
++        || FindMonWithFlagsAndSuperEffective(MOVE_RESULT_NOT_VERY_EFFECTIVE, AI_SWITCH_ODDS(3)))
+         return TRUE;
+ 
+     return FALSE;
