@@ -272,3 +272,13 @@ mantiene el nivel original, que es el tope.
 | Kecleon | 28 | Cambio Color | Roca del Rey | Ladrón, Psicorrayo, Finta, Chirrido |
 | Linoone | 29 | Recogida | Baya Salac | Tambor, Cuchillada, Facade, Cabezazo |
 | Slaking | 31 | Truant | Restos | Facade, Respiro, Contraataque, Finta |
+
+**Winona** (Volador con cobertura, sol y Danza Dragón; 5 Pokémon, tope 33)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Swablu | 29 | Cura Natural | Baya Zidra | Ataque Aéreo, Canto, Salvaguarda, Canto Mortal |
+| Tropius | 29 | Clorofila | Semilla Milagro | Día Soleado, Rayo Solar, Ataque Aéreo, Síntesis |
+| Pelipper | 30 | Vista Lince | Agua Mística | Surf, Ataque Aéreo, Protección, Supersónico |
+| Skarmory | 31 | Vista Lince | Pico Afilado | Ataque Aéreo, Ala de Acero, Agilidad, Tóxico |
+| Altaria | 33 | Cura Natural | Baya Lum | Danza Dragón, Terremoto, Garra Dragón, Ataque Aéreo |
