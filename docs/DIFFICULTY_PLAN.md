@@ -374,3 +374,28 @@ Lombre/Slugma (Torchic). Ruta 103: un solo Pokémon, nivel 5.
 | Petalia | Lotad 13, Ralts 13, Torchic 15 |
 | Ruta 119 | Pelipper 29, Kirlia 29, Lombre 29, Manectric 30, Combusken 31 |
 | Lilycove | Tropius 31, Pelipper 32, Ludicolo 32, Manectric 33, Gardevoir 33, Combusken 34 |
+
+## Revanchas y combate final de nivel 100
+
+El juego solo permite el combate original y cuatro revanchas por líder, así que
+se recortó la primera: las revanchas usan los niveles de las antiguas tercera,
+cuarta y quinta, y la última es un equipo de **nivel 100 competitivo**.
+Con legendarios, de Roxanne a Juan:
+
+| Líder | Legendarios en las revanchas |
+|---|---|
+| Roxanne | Regirock (rev. 2 y 3), Registeel (3) |
+| Brawly | Mew (2 y 3), Mewtwo (3) |
+| Wattson | Raikou (2 y 3), Zapdos (3) |
+| Flannery | Entei (2 y 3), Moltres (3) |
+| Norman | Deoxys (2 y 3), Jirachi (3) |
+| Winona | Articuno (2 y 3), Lugia (3) |
+| Tate y Liza | Latias (2 y 3), Celebi (3) |
+| Juan | Suicune (2 y 3), Groudon (3) |
+
+Los equipos están en `tools/gen_trainer_teams.py`, que escribe
+`3ds_port/src/3ds_trainer_teams_data.h` (60 equipos: 8 líderes, 24 revanchas,
+Alto Mando, Wallace y los 15 del rival para Brendan y May). Cada uno lleva
+IVs y EVs según su fuerza: líderes 20 y 40, Alto Mando y Wallace 25 y 120,
+revanchas 28 y 180 la primera y 31 y 252 el resto. El rival sube de 20 y 40 a
+25 y 100 hacia Lilycove.
