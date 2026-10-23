@@ -212,3 +212,15 @@ Trueno van por delante de lo que esas especies aprenden a esos niveles.
 
 Todos con IV 20 y 40 EVs en dos estadísticas, mientras el ajuste de IVs sea
 "originales". Pendiente: sus revanchas (D5).
+
+**Brawly** (Bulk Up y críticos; el as sigue en el nivel 19 del original, así
+que el tope antes de su medalla es 19). Patada Salto Alta, Reversión y Ataque
+Rápido de Hitmontop van por delante de lo que esas especies aprenden a esos
+niveles. El Makuhita usa la segunda habilidad, Agallas.
+
+| Pokémon | Nv | Habilidad | Naturaleza | Objeto | Movimientos |
+|---|---|---|---|---|---|
+| Machop | 16 | Agallas | Firme | Lupa | Golpe Kárate, Sismo Toss, Pico Impulso, Tumba Rocas |
+| Meditite | 16 | Energía Pura | Alegre | Baya Lum | Patada Salto Alta, Pico Impulso, Confusión, Detección |
+| Hitmontop | 17 | Intimidación | Alegre | Cinturón Negro | Patada Giro, Venganza, Persecución, Ataque Rápido |
+| Makuhita | 19 | Agallas | Firme | Baya Salac | Reversión, Pico Impulso, Llave Vital, Empujón |

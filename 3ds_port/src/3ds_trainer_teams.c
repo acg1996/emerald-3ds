@@ -63,9 +63,26 @@ static const struct TeamMon sRoxanne1[] =
      {MOVE_BLOCK, MOVE_ROCK_TOMB, MOVE_THUNDER_WAVE, MOVE_HARDEN}, {40, 0, 40, 0, 0, 0}},
 };
 
+/* Brawly: Bulk Up and critical hits, each Pokémon covering a weakness of the
+ * type; the ace is a Reversal with a Salac Berry. High Jump Kick (Meditite),
+ * Reversal (Makuhita) and Quick Attack (Hitmontop) are ahead of what the
+ * species learn at those levels. */
+static const struct TeamMon sBrawly1[] =
+{
+    {SPECIES_MACHOP, 16, 0, NATURE_ADAMANT, 20, ITEM_SCOPE_LENS,
+     {MOVE_KARATE_CHOP, MOVE_SEISMIC_TOSS, MOVE_BULK_UP, MOVE_ROCK_TOMB}, {0, 40, 0, 40, 0, 0}},
+    {SPECIES_MEDITITE, 16, 0, NATURE_JOLLY, 20, ITEM_LUM_BERRY,
+     {MOVE_HI_JUMP_KICK, MOVE_BULK_UP, MOVE_CONFUSION, MOVE_DETECT}, {0, 40, 0, 40, 0, 0}},
+    {SPECIES_HITMONTOP, 17, 0, NATURE_JOLLY, 20, ITEM_BLACK_BELT,
+     {MOVE_ROLLING_KICK, MOVE_REVENGE, MOVE_PURSUIT, MOVE_QUICK_ATTACK}, {0, 40, 0, 40, 0, 0}},
+    {SPECIES_MAKUHITA, 19, 1, NATURE_ADAMANT, 20, ITEM_SALAC_BERRY,
+     {MOVE_REVERSAL, MOVE_BULK_UP, MOVE_VITAL_THROW, MOVE_ARM_THRUST}, {40, 40, 0, 0, 0, 0}},
+};
+
 static const struct Team sTeams[] =
 {
     {TRAINER_ROXANNE_1, ARRAY_COUNT(sRoxanne1), sRoxanne1},
+    {TRAINER_BRAWLY_1, ARRAY_COUNT(sBrawly1), sBrawly1},
 };
 
 /* The team a trainer has now, or NULL: the setting must reach their class. */
