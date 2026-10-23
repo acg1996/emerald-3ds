@@ -302,3 +302,13 @@ mantiene el nivel original, que es el tope.
 | Sealeo | 43 | Sebo | Baya Chesto | Rayo Hielo, Surf, Descanso, Golpe Cuerpo |
 | Crawdaunt | 43 | Corte Vigor | Baya Liechi | Danza Espada, Martillazo, Desarme, Mofa |
 | Kingdra | 46 | Nado Rápido | Agua Mística | Hidrobomba, Rayo Hielo, Aliento Dragón, Agilidad |
+
+**Sidney** (trampas y desgaste; 5 Pokémon, tope 49; Sharpedo sustituye a Crawdaunt para no repetir el de Juan)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Mightyena | 46 | Intimidación | Gafas Negras | Triturar, Doble Filo, Mofa, Rugido |
+| Shiftry | 48 | Clorofila | Baya Lum | Danza Espada, Finta, Paranormal, Torbellino |
+| Cacturne | 46 | Velo Arena | Restos | Púas, Brazo Aguja, Finta, Drenadoras |
+| Sharpedo | 48 | Piel Tosca | Agua Mística | Triturar, Surf, Rayo Hielo, Mofa |
+| Absol | 49 | Presión | Lupa | Danza Espada, Cuchillada, Ataque Aéreo, Avalancha |
