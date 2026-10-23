@@ -24,6 +24,8 @@
 
 #define TILES_PER_TILESET 512u
 #define SUBTILE_PX 8u
+/* How far inside a slot its quad's texture coordinates start, in texels. */
+#define VOXEL_ATLAS_UV_INSET 0.1f
 
 void VoxelAtlas_SlotUV(unsigned slot, float *u0, float *v0, float *u1, float *v1)
 {
@@ -32,11 +34,23 @@ void VoxelAtlas_SlotUV(unsigned slot, float *u0, float *v0, float *u1, float *v1
     float x = (float)(slot % VOXEL_ATLAS_COLUMNS) * VOXEL_ATLAS_SLOT;
     float y = (float)(slot / VOXEL_ATLAS_COLUMNS) * VOXEL_ATLAS_SLOT;
 
-    /* Row 0 in memory is v=1, the same convention the 2D compositor uses. */
-    *u0 = page * 2.0f + x / VOXEL_ATLAS_W;
-    *u1 = page * 2.0f + (x + VOXEL_ATLAS_SLOT) / VOXEL_ATLAS_W;
-    *v0 = 1.0f - y / VOXEL_ATLAS_H;
-    *v1 = 1.0f - (y + VOXEL_ATLAS_SLOT) / VOXEL_ATLAS_H;
+    /*
+     * Row 0 in memory is v=1, the same convention the 2D compositor uses.
+     *
+     * Slots touch, with nothing between them, and a page is zero (clear and
+     * transparent) where no slot is. A pixel whose centre lies a hair outside
+     * its quad - the rasteriser's rounding, which for a horizontal edge is the
+     * same for the whole row - would sample the next slot's texel: a thin line of
+     * another tile's colour, or of the clear colour where the neighbour is empty,
+     * at some camera positions. The quad takes its texels from a little inside
+     * the slot instead.
+     */
+    const float insetU = VOXEL_ATLAS_UV_INSET / VOXEL_ATLAS_W, insetV = VOXEL_ATLAS_UV_INSET / VOXEL_ATLAS_H;
+
+    *u0 = page * 2.0f + x / VOXEL_ATLAS_W + insetU;
+    *u1 = page * 2.0f + (x + VOXEL_ATLAS_SLOT) / VOXEL_ATLAS_W - insetU;
+    *v0 = 1.0f - y / VOXEL_ATLAS_H - insetV;
+    *v1 = 1.0f - (y + VOXEL_ATLAS_SLOT) / VOXEL_ATLAS_H + insetV;
 }
 
 void VoxelAtlas_SolidUV(VoxelSolidColor color, float *u0, float *v0, float *u1, float *v1)
