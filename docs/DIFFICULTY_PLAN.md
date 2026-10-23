@@ -292,3 +292,13 @@ mantiene el nivel original, que es el tope.
 | Lunatone | 42 | Levitación | Baya Zidra | Psíquico, Paz Mental, Hipnosis, Bola Sombra |
 | Solrock | 42 | Levitación | Semilla Milagro | Día Soleado, Rayo Solar, Avalancha, Psíquico |
 | Gardevoir | 42 | Rastro | Baya Lum | Paz Mental, Psíquico, Bola Sombra, Rayo |
+
+**Juan** (lluvia con Nado Rápido; 5 Pokémon, tope 46)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Whiscash | 41 | Despiste | Baya Zidra | Danza Lluvia, Surf, Terremoto, Amnesia |
+| Luvdisc | 41 | Nado Rápido | Baya Salac | Surf, Flail, Agilidad, Atracción |
+| Sealeo | 43 | Sebo | Baya Chesto | Rayo Hielo, Surf, Descanso, Golpe Cuerpo |
+| Crawdaunt | 43 | Corte Vigor | Baya Liechi | Danza Espada, Martillazo, Desarme, Mofa |
+| Kingdra | 46 | Nado Rápido | Agua Mística | Hidrobomba, Rayo Hielo, Aliento Dragón, Agilidad |
