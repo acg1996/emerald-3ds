@@ -332,3 +332,17 @@ mantiene el nivel original, que es el tope.
 | Jynx | 52 | Despiste | Baya Lum | Rayo Hielo, Psíquico, Beso Amoroso, Paz Mental |
 | Lapras | 52 | Armadura Concha | Restos | Rayo Hielo, Surf, Rayo, Rayo Confuso |
 | Walrein | 53 | Sebo | Baya Chesto | Rayo Hielo, Surf, Golpe Cuerpo, Descanso |
+
+**Drake** (dragones que cubren todo, con Latios; 6 Pokémon, tope 55). En Gen 3
+el tipo Dragón es especial, así que Danza Dragón se usa con ataques físicos de
+otros tipos. Latios es un legendario usado como pieza "loca" y Tyranitar es
+opcional.
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Flygon | 53 | Levitación | Arena Suave | Terremoto, Avalancha, Garra Dragón, Chirrido |
+| Gyarados | 53 | Intimidación | Baya Lum | Danza Dragón, Azote, Terremoto, Avalancha |
+| Dragonite | 54 | Fuerza Mental | Restos | Onda Trueno, Agilidad, Terremoto, Ataque Aéreo |
+| Latios | 54 | Levitación | Rocío Bondad | Psíquico, Paz Mental, Recuperación, Garra Dragón |
+| Tyranitar | 54 | Chorro Arena | Campana Concha | Tempestad Arena, Avalancha, Terremoto, Azote |
+| Salamence | 55 | Intimidación | Colmillo Dragón | Garra Dragón, Vuelo, Terremoto, Lanzallamas |
