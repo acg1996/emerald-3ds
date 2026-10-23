@@ -262,3 +262,13 @@ mantiene el nivel original, que es el tope.
 | Magmar | 25 | Cuerpo Llama | Campana Concha | Puño Fuego, Puño Trueno, Polución, Pantalla de Humo |
 | Camerupt | 26 | Armadura Magma | Restos | Recalentón, Terremoto, Avalancha, Amnesia |
 | Torkoal | 29 | Humo Blanco | Hierba Blanca | Recalentón, Lanzallamas, Golpe Cuerpo, Protección |
+
+**Norman** (Facade y cobertura; 5 Pokémon, tope 31)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Spinda | 27 | Ritmo Propio | Pañuelo Seda | Facade, Psicorrayo, Puño Mareo, Otra Vez |
+| Vigoroth | 27 | Espíritu Vital | Garra Rápida | Facade, Cuchillada, Demolición, Pico Impulso |
+| Kecleon | 28 | Cambio Color | Roca del Rey | Ladrón, Psicorrayo, Finta, Chirrido |
+| Linoone | 29 | Recogida | Baya Salac | Tambor, Cuchillada, Facade, Cabezazo |
+| Slaking | 31 | Truant | Restos | Facade, Respiro, Contraataque, Finta |
