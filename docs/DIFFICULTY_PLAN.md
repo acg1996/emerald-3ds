@@ -359,3 +359,18 @@ cambian porque los usan Juan y Drake.
 | Starmie | 56 | Cura Natural | Baya Salac | Surf, Psíquico, Trueno, Recuperación |
 | Kyogre | 57 | Llovizna | Agua Mística | Hidrobomba, Rayo Hielo, Trueno, Paz Mental |
 | Milotic | 58 | Escama Especial | Restos | Recuperación, Surf, Rayo Hielo, Tóxico |
+
+**Rival, resto de combates** (acordado el plan; los equipos concretos están en
+la propuesta de la conversación y se escriben al implementar). Dos compañeros
+fijos evolucionan de un combate a otro: Ralts (Petalia 13) → Kirlia (Ruta 119,
+29) → Gardevoir (Lilycove, 33), y Electrike (Ruta 110) → Manectric (Ruta 119,
+30; Lilycove, 33). El inicial es el as, con las piezas de tipo de siempre:
+Lotad/Lombre/Ludicolo (jugador Treecko), Slugma/Pelipper (Mudkip) y
+Lombre/Slugma (Torchic). Ruta 103: un solo Pokémon, nivel 5.
+
+| Combate | Pokémon (variante con Treecko) |
+|---|---|
+| Ruta 103 | Torchic 5 |
+| Petalia | Lotad 13, Ralts 13, Torchic 15 |
+| Ruta 119 | Pelipper 29, Kirlia 29, Lombre 29, Manectric 30, Combusken 31 |
+| Lilycove | Tropius 31, Pelipper 32, Ludicolo 32, Manectric 33, Gardevoir 33, Combusken 34 |
