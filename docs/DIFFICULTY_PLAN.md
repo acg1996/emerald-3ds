@@ -346,3 +346,16 @@ opcional.
 | Latios | 54 | Levitación | Rocío Bondad | Psíquico, Paz Mental, Recuperación, Garra Dragón |
 | Tyranitar | 54 | Chorro Arena | Campana Concha | Tempestad Arena, Avalancha, Terremoto, Azote |
 | Salamence | 55 | Intimidación | Colmillo Dragón | Garra Dragón, Vuelo, Terremoto, Lanzallamas |
+
+**Wallace** (lluvia total con Kyogre; 6 Pokémon, tope 58). Kyogre es un
+legendario usado como pieza "loca". Whiscash y Gyarados del original se
+cambian porque los usan Juan y Drake.
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Wailord | 57 | Velo Agua | Baya Chesto | Danza Lluvia, Water Spout, Rayo Hielo, Descanso |
+| Tentacruel | 55 | Cuerpo Puro | Flecha Venenosa | Hidrobomba, Bomba Lodo, Rayo Hielo, Tóxico |
+| Ludicolo | 56 | Nado Rápido | Baya Lum | Surf, Gigadrenado, Rayo Hielo, Drenadoras |
+| Starmie | 56 | Cura Natural | Baya Salac | Surf, Psíquico, Trueno, Recuperación |
+| Kyogre | 57 | Llovizna | Agua Mística | Hidrobomba, Rayo Hielo, Trueno, Paz Mental |
+| Milotic | 58 | Escama Especial | Restos | Recuperación, Surf, Rayo Hielo, Tóxico |
