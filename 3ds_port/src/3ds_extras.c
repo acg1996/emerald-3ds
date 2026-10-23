@@ -197,6 +197,16 @@ static const u8 *SpeedText(void)
     return text;
 }
 
+/*
+ * Difficulty (DIFFICULTY page). Each line only stores its choice under a
+ * "diff_*" key; the game code that applies it reads the key with
+ * CtrExtras_Get. Every setting's first value is the original game.
+ */
+static const char *const sDiffIvScope[] = {CTR_TEXT("ORIGINAL", "ORIGINALES", "ORIGINAUX", "ORIGINALI"), CTR_TEXT("LEADERS/E4", "LÍDERES/A.MANDO", "CHEFS/CONSEIL 4", "CAPI/LEGA"), CTR_TEXT("ALL", "TODOS", "TOUS", "TUTTI")};
+static const char *const sDiffIvLevel[] = {CTR_TEXT("GOOD 25-31", "BUENOS 25-31", "BONS 25-31", "BUONI 25-31"), CTR_TEXT("PERFECT 31", "PERFECTOS 31", "PARFAITS 31", "PERFETTI 31")};
+static const char *const sDiffScope[] = {CTR_TEXT("OFF", "NO", "NON", "NO"), CTR_TEXT("LEADERS", "LÍDERES", "CHEFS", "CAPI"), CTR_TEXT("LEADERS+E4", "LÍD.+A.MANDO", "CHEFS+CONSEIL", "CAPI+LEGA")};
+static const char *const sDiffAi[] = {CTR_TEXT("ORIGINAL", "ORIGINAL", "ORIGINALE", "ORIGINALE"), CTR_TEXT("SMART: LEADERS", "MEJOR: LÍDERES", "AMÉL.: CHEFS", "MIGL.: CAPI"), CTR_TEXT("SMART: ALL", "MEJOR: TODOS", "AMÉL.: TOUS", "MIGL.: TUTTI")};
+
 const CtrExtra gCtrExtras[] =
 {
     /* Features add their lines here. */
@@ -245,6 +255,13 @@ const CtrExtra gCtrExtras[] =
     /* The lead Pokémon walking behind the player, on HGSS's sprites from the
      * data pack (src/follower_mon.c). */
     {CTR_EXTRAS_SCREEN(CTR_EXTRAS_ENHANCEMENTS, 1), CTR_TEXT("FOLLOWER", "ACOMPAÑANTE", "COMPAGNON", "COMPAGNO"), "follower", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
+    /* The trainers' IVs, the level cap by badges, the battle AI and the
+     * redesigned leader teams (docs/DIFFICULTY_PLAN.md). */
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER IVS", "IV ENTRENADORES", "IV DRESSEURS", "IV ALLENATORI"), "diff_iv_scope", 3, 0, sDiffIvScope, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV QUALITY", "CALIDAD DE IV", "QUALITÉ DES IV", "QUALITÀ IV"), "diff_iv_level", 2, 0, sDiffIvLevel, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("LEVEL CAP", "TOPE DE NIVEL", "NIVEAU MAX", "LIV. MASSIMO"), "diff_level_cap", 3, 0, sDiffScope, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER AI", "IA ENTRENADORES", "IA DRESSEURS", "IA ALLENATORI"), "diff_ai", 3, 0, sDiffAi, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
     {0},
 };
 

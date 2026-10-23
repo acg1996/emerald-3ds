@@ -3,7 +3,7 @@
 
 /*
  * Optional gameplay settings, shown on pages of their own in the bottom
- * screen's OPTIONS (ENHANCEMENTS, CHEATS) next to the game's and the port's
+ * screen's OPTIONS (ENHANCEMENTS, CHEATS, DIFFICULTY) next to the game's and the port's
  * options. Each one is a line of the table in src/3ds_extras.c; its value is
  * kept in settings.txt under its key (CtrSettings_GetInt). A page with no
  * line has no tab, and OPTIONS looks as before.
@@ -18,6 +18,7 @@ enum
     CTR_EXTRAS_OPTIONS,        /* the page of the game's and the port's options */
     CTR_EXTRAS_ENHANCEMENTS,
     CTR_EXTRAS_CHEATS,
+    CTR_EXTRAS_DIFFICULTY,
     CTR_EXTRAS_PAGES
 };
 
@@ -29,7 +30,7 @@ enum
 
 typedef struct
 {
-    uint8_t page;                  /* CTR_EXTRAS_ENHANCEMENTS or CTR_EXTRAS_CHEATS, or a later
+    uint8_t page;                  /* CTR_EXTRAS_ENHANCEMENTS, _CHEATS or _DIFFICULTY, or a later
                                     * screen of one (CTR_EXTRAS_SCREEN) */
     const char *name;              /* ASCII, as the cell shows it */
     const char *key;               /* settings.txt key */
