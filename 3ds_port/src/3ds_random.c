@@ -6,6 +6,7 @@
 #include "data.h"
 #include "pokemon.h"
 #include "constants/abilities.h"
+#include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/opponents.h"
 #include "constants/pokemon.h"
@@ -81,6 +82,14 @@ uint16_t CtrRandom_Gift(uint16_t species)
     return RandomSpecies(0x61F7, species);
 }
 
+static bool8 IsWally(u16 trainerNum)
+{
+    return trainerNum == TRAINER_WALLY_MAUVILLE || trainerNum == TRAINER_WALLY_VR_1 || trainerNum == TRAINER_WALLY_VR_2
+        || trainerNum == TRAINER_WALLY_VR_3 || trainerNum == TRAINER_WALLY_VR_4 || trainerNum == TRAINER_WALLY_VR_5;
+}
+
+/* The battles of the story: leaders, Elite Four, Champion, the rival, Wally
+ * and the bosses and admins of Team Aqua and Team Magma. */
 static bool8 IsBoss(u16 trainerNum)
 {
     u8 class;
@@ -89,33 +98,103 @@ static bool8 IsBoss(u16 trainerNum)
         return FALSE;
     class = gTrainers[trainerNum].trainerClass;
     return class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_ELITE_FOUR
-        || class == TRAINER_CLASS_CHAMPION || class == TRAINER_CLASS_RIVAL;
+        || class == TRAINER_CLASS_CHAMPION || class == TRAINER_CLASS_RIVAL
+        || class == TRAINER_CLASS_AQUA_LEADER || class == TRAINER_CLASS_AQUA_ADMIN
+        || class == TRAINER_CLASS_MAGMA_LEADER || class == TRAINER_CLASS_MAGMA_ADMIN;
+}
+
+/* Wally and the rival keep their last Pokémon, the main one, the same species
+ * in every battle: it is told by the run, not by the battle. */
+#define ACE_WALLY 0x3A11
+#define ACE_RIVAL 0x3B22
+
+static u32 AceKey(u16 trainerNum)
+{
+    if (IsWally(trainerNum))
+        return ACE_WALLY;
+    if (trainerNum < TRAINERS_COUNT && gTrainers[trainerNum].trainerClass == TRAINER_CLASS_RIVAL)
+        return ACE_RIVAL;
+    return 0;
+}
+
+/* What a story battle's Pokémon hold: useful ones, by the side they hit from. */
+static const u16 sPhysicalItems[] =
+{
+    ITEM_CHOICE_BAND, ITEM_LIECHI_BERRY, ITEM_SCOPE_LENS, ITEM_LEFTOVERS, ITEM_LUM_BERRY,
+    ITEM_SITRUS_BERRY, ITEM_SHELL_BELL, ITEM_FOCUS_BAND, ITEM_SALAC_BERRY,
+};
+static const u16 sSpecialItems[] =
+{
+    ITEM_PETAYA_BERRY, ITEM_SCOPE_LENS, ITEM_LEFTOVERS, ITEM_LUM_BERRY,
+    ITEM_SITRUS_BERRY, ITEM_SHELL_BELL, ITEM_FOCUS_BAND, ITEM_SALAC_BERRY,
+};
+
+/* The same personality every time, of the wanted nature. */
+static u32 PersonalityOfNature(u32 seed, u8 nature)
+{
+    u32 personality = seed;
+
+    do
+        personality = personality * 1664525u + 1013904223u;
+    while (GetNatureFromPersonality(personality) != nature);
+    return personality;
 }
 
 void CtrRandom_Party(struct Pokemon *party, uint8_t count, uint16_t trainerNum)
 {
     int mode = Mode();
+    bool8 boss = IsBoss(trainerNum);
+    u32 ace = AceKey(trainerNum);
     u8 i, stat;
 
-    if (mode < RANDOM_TRAINERS || (mode < RANDOM_BOSSES && IsBoss(trainerNum)))
+    if (mode < RANDOM_TRAINERS || (mode < RANDOM_BOSSES && boss))
         return;
     for (i = 0; i < count; i++)
     {
         u16 species = GetMonData(&party[i], MON_DATA_SPECIES);
         u8 level = GetMonData(&party[i], MON_DATA_LEVEL);
         u16 item = GetMonData(&party[i], MON_DATA_HELD_ITEM);
-        u8 ivs[NUM_STATS];
+        u8 ivs[NUM_STATS], evs[NUM_STATS], strongest = 0;
         u32 id = ((u32)trainerNum << 3) | i;
+        u32 personality = Hash(id, species, 4);
+        u16 newSpecies = (ace != 0 && i == count - 1) ? RandomSpecies(ace, 0) : RandomSpecies(id, species);
 
         if (species == SPECIES_NONE)
             continue;
         for (stat = 0; stat < NUM_STATS; stat++)
+        {
             ivs[stat] = GetMonData(&party[i], MON_DATA_HP_IV + stat);
-        /* A new Pokémon of the same level, IVs and item; its moves are the
-         * ones its species learns by then (random ones from mode 4). */
-        CreateMon(&party[i], RandomSpecies(id, species), level, 0, TRUE, Hash(id, species, 4), OT_ID_RANDOM_NO_SHINY, 0);
+            evs[stat] = GetMonData(&party[i], MON_DATA_HP_EV + stat);
+            if (evs[stat] > strongest)
+                strongest = evs[stat];
+        }
+        if (boss)
+        {
+            /* A story battle: a nature, EVs and an item that suit the new
+             * species. The EVs are as many as the redesigned team had. */
+            const struct SpeciesInfo *base = &gSpeciesInfo[newSpecies];
+            bool8 physical = base->baseAttack >= base->baseSpAttack, fast = base->baseSpeed >= 80;
+            u8 nature = physical ? (fast ? NATURE_JOLLY : NATURE_ADAMANT) : (fast ? NATURE_TIMID : NATURE_MODEST);
+
+            personality = PersonalityOfNature(personality, nature);
+            for (stat = 0; stat < NUM_STATS; stat++)
+                evs[stat] = 0;
+            evs[physical ? 1 : 4] = strongest;
+            evs[base->baseSpeed >= 60 ? 3 : 0] = strongest;
+            if (physical)
+                item = sPhysicalItems[Hash(id, newSpecies, 5) % ARRAY_COUNT(sPhysicalItems)];
+            else
+                item = sSpecialItems[Hash(id, newSpecies, 5) % ARRAY_COUNT(sSpecialItems)];
+        }
+        /* A new Pokémon of the same level and IVs; its moves are the ones its
+         * species learns by then (random ones from mode 4). */
+        CreateMon(&party[i], newSpecies, level, 0, TRUE, personality, OT_ID_RANDOM_NO_SHINY, 0);
         for (stat = 0; stat < NUM_STATS; stat++)
+        {
             SetMonData(&party[i], MON_DATA_HP_IV + stat, &ivs[stat]);
+            if (boss)
+                SetMonData(&party[i], MON_DATA_HP_EV + stat, &evs[stat]);
+        }
         SetMonData(&party[i], MON_DATA_HELD_ITEM, &item);
         CalculateMonStats(&party[i]);
     }

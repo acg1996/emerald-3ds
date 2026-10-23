@@ -59,7 +59,9 @@ static const struct Team *ActiveTeam(u16 trainerNum)
     if (scope == TEAMS_OFF || trainerNum >= TRAINERS_COUNT)
         return NULL;
     class = gTrainers[trainerNum].trainerClass;
-    if (class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_RIVAL ? scope < TEAMS_LEADERS : scope < TEAMS_LEADERS_AND_ELITE_FOUR)
+    if (class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_RIVAL || class == TRAINER_CLASS_AQUA_LEADER
+     || class == TRAINER_CLASS_AQUA_ADMIN || class == TRAINER_CLASS_MAGMA_LEADER || class == TRAINER_CLASS_MAGMA_ADMIN
+        ? scope < TEAMS_LEADERS : scope < TEAMS_LEADERS_AND_ELITE_FOUR)
         return NULL;
     for (i = 0; i < ARRAY_COUNT(sTeams); i++)
         if (sTeams[i].trainerNum == trainerNum)
@@ -100,15 +102,19 @@ static void BuildMon(struct Pokemon *mon, const struct TeamMon *team, u16 traine
 uint8_t CtrTeams_Apply(struct Pokemon *party, uint8_t count, uint16_t trainerNum)
 {
     const struct Team *team = ActiveTeam(trainerNum);
-    u8 i;
+    /* Two opponents (Maxie and Tabitha in Mossdeep) share the party: each has
+     * its half, and the pointer already tells which. */
+    u8 room = gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS ? PARTY_SIZE / 2 : PARTY_SIZE;
+    u8 size, i;
 
-    if (team == NULL || gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
+    if (team == NULL)
         return count;
-    for (i = 0; i < PARTY_SIZE; i++)
+    size = team->count < room ? team->count : room;
+    for (i = 0; i < room; i++)
         ZeroMonData(&party[i]);
-    for (i = 0; i < team->count; i++)
+    for (i = 0; i < size; i++)
         BuildMon(&party[i], &team->mons[i], trainerNum, i);
-    return team->count;
+    return size;
 }
 
 uint8_t CtrTeams_TopLevel(uint16_t trainerNum)
