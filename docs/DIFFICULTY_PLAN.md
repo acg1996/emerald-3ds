@@ -282,3 +282,13 @@ mantiene el nivel original, que es el tope.
 | Pelipper | 30 | Vista Lince | Agua Mística | Surf, Ataque Aéreo, Protección, Supersónico |
 | Skarmory | 31 | Vista Lince | Pico Afilado | Ataque Aéreo, Ala de Acero, Agilidad, Tóxico |
 | Altaria | 33 | Cura Natural | Baya Lum | Danza Dragón, Terremoto, Garra Dragón, Ataque Aéreo |
+
+**Tate y Liza** (sol y luna, inmunes a Terremoto; combate doble; 5 Pokémon, tope 42)
+
+| Pokémon | Nv | Habilidad | Objeto | Movimientos |
+|---|---|---|---|---|
+| Claydol | 41 | Levitación | Restos | Terremoto, Poder Antiguo, Psíquico, Giro Rápido |
+| Xatu | 41 | Sincronía | Cuchara Retorcida | Psíquico, Paz Mental, Deseo, Rayo Confuso |
+| Lunatone | 42 | Levitación | Baya Zidra | Psíquico, Paz Mental, Hipnosis, Bola Sombra |
+| Solrock | 42 | Levitación | Semilla Milagro | Día Soleado, Rayo Solar, Avalancha, Psíquico |
+| Gardevoir | 42 | Rastro | Baya Lum | Paz Mental, Psíquico, Bola Sombra, Rayo |
