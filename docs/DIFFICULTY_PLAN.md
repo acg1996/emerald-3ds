@@ -205,7 +205,7 @@ Trueno van por delante de lo que esas especies aprenden a esos niveles.
 
 | Pokémon | Nv | Habilidad | Naturaleza | Objeto | Movimientos |
 |---|---|---|---|---|---|
-| Geodude | 13 | Cabeza Roca | Agarrada | Baya Zidra | Rollout, Rizo Defensa, Tumba Rocas, Lanzarrocas |
+| Geodude | 13 | Cabeza Roca | Agitada | Baya Zidra | Rollout, Rizo Defensa, Tumba Rocas, Lanzarrocas |
 | Aron | 13 | Robustez | Firme | Cinta Focus | Garra Metal, Tumba Rocas, Fortaleza, Cabezazo |
 | Anorith | 14 | Armadura Batalla | Firme | Garra Rápida | Garra Metal, Tumba Rocas, Corte Furia, Fortaleza |
 | Nosepass | 16 | Robustez | Plácida | Baya Aranja | Bloqueo, Tumba Rocas, Onda Trueno, Fortaleza |
