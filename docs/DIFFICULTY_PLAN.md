@@ -224,3 +224,16 @@ niveles. El Makuhita usa la segunda habilidad, Agallas.
 | Meditite | 16 | Energía Pura | Alegre | Baya Lum | Patada Salto Alta, Pico Impulso, Confusión, Detección |
 | Hitmontop | 17 | Intimidación | Alegre | Cinturón Negro | Patada Giro, Venganza, Persecución, Ataque Rápido |
 | Makuhita | 19 | Agallas | Firme | Baya Salac | Reversión, Pico Impulso, Llave Vital, Empujón |
+
+**Rival, Ruta 110** (Brendan o May: el mismo equipo; la variante depende del
+inicial del jugador; niveles originales 18, 18 y 20). El rival cuenta con los
+líderes en los ajustes *IV entrenadores*, *IA entrenadores* y *Equipos nuevos*
+(valor "Líderes"). Electrike es un Pokémon nuevo común a las tres variantes.
+
+| Si eliges | Equipo del rival |
+|---|---|
+| Treecko | Wingull 18, Electrike 18, Lombre 18, Combusken 20 |
+| Mudkip | Slugma 18, Wingull 18, Electrike 18, Grovyle 20 |
+| Torchic | Lombre 18, Slugma 18, Electrike 18, Marshtomp 20 |
+
+Pendientes del rival: Ruta 103, Petalia, Ruta 119 y Lilycove.

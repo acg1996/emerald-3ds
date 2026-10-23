@@ -79,10 +79,60 @@ static const struct TeamMon sBrawly1[] =
      {MOVE_REVERSAL, MOVE_BULK_UP, MOVE_VITAL_THROW, MOVE_ARM_THRUST}, {40, 40, 0, 0, 0, 0}},
 };
 
+/* The rival (Brendan or May: the same team) on Route 110, by the player's
+ * starter; the three share Wingull-Electrike-Lombre-Slugma pieces. Levels as in
+ * the game. Quick Attack (Wingull), Fake Out and Bubble Beam (Lombre), Mega
+ * Drain (Grovyle) and Bulk Up are ahead of what the species learn. */
+#define RIVAL_WINGULL \
+    {SPECIES_WINGULL, 18, 0, NATURE_TIMID, 20, ITEM_SITRUS_BERRY, \
+     {MOVE_WATER_GUN, MOVE_WING_ATTACK, MOVE_SUPERSONIC, MOVE_QUICK_ATTACK}, {0, 0, 0, 40, 40, 0}}
+#define RIVAL_ELECTRIKE \
+    {SPECIES_ELECTRIKE, 18, 0, NATURE_JOLLY, 20, ITEM_ORAN_BERRY, \
+     {MOVE_SPARK, MOVE_THUNDER_WAVE, MOVE_QUICK_ATTACK, MOVE_HOWL}, {0, 40, 0, 40, 0, 0}}
+#define RIVAL_LOMBRE \
+    {SPECIES_LOMBRE, 18, 0, NATURE_MODEST, 20, ITEM_LUM_BERRY, \
+     {MOVE_FAKE_OUT, MOVE_MEGA_DRAIN, MOVE_BUBBLE_BEAM, MOVE_NATURE_POWER}, {0, 0, 0, 0, 40, 40}}
+#define RIVAL_SLUGMA \
+    {SPECIES_SLUGMA, 18, 1, NATURE_MODEST, 20, ITEM_CHARCOAL, \
+     {MOVE_EMBER, MOVE_ROCK_THROW, MOVE_SMOG, MOVE_YAWN}, {40, 0, 0, 0, 40, 0}}
+
+static const struct TeamMon sRival110Treecko[] =
+{
+    RIVAL_WINGULL,
+    RIVAL_ELECTRIKE,
+    RIVAL_LOMBRE,
+    {SPECIES_COMBUSKEN, 20, 0, NATURE_ADAMANT, 20, ITEM_CHARCOAL,
+     {MOVE_DOUBLE_KICK, MOVE_EMBER, MOVE_BULK_UP, MOVE_PECK}, {0, 40, 0, 40, 0, 0}},
+};
+
+static const struct TeamMon sRival110Mudkip[] =
+{
+    RIVAL_SLUGMA,
+    RIVAL_WINGULL,
+    RIVAL_ELECTRIKE,
+    {SPECIES_GROVYLE, 20, 0, NATURE_JOLLY, 20, ITEM_MIRACLE_SEED,
+     {MOVE_MEGA_DRAIN, MOVE_FURY_CUTTER, MOVE_QUICK_ATTACK, MOVE_PURSUIT}, {0, 40, 0, 40, 0, 0}},
+};
+
+static const struct TeamMon sRival110Torchic[] =
+{
+    RIVAL_LOMBRE,
+    RIVAL_SLUGMA,
+    RIVAL_ELECTRIKE,
+    {SPECIES_MARSHTOMP, 20, 0, NATURE_MODEST, 20, ITEM_MYSTIC_WATER,
+     {MOVE_MUD_SHOT, MOVE_WATER_GUN, MOVE_ROCK_TOMB, MOVE_MUD_SLAP}, {40, 0, 0, 0, 40, 0}},
+};
+
 static const struct Team sTeams[] =
 {
     {TRAINER_ROXANNE_1, ARRAY_COUNT(sRoxanne1), sRoxanne1},
     {TRAINER_BRAWLY_1, ARRAY_COUNT(sBrawly1), sBrawly1},
+    {TRAINER_BRENDAN_ROUTE_110_TREECKO, ARRAY_COUNT(sRival110Treecko), sRival110Treecko},
+    {TRAINER_BRENDAN_ROUTE_110_MUDKIP, ARRAY_COUNT(sRival110Mudkip), sRival110Mudkip},
+    {TRAINER_BRENDAN_ROUTE_110_TORCHIC, ARRAY_COUNT(sRival110Torchic), sRival110Torchic},
+    {TRAINER_MAY_ROUTE_110_TREECKO, ARRAY_COUNT(sRival110Treecko), sRival110Treecko},
+    {TRAINER_MAY_ROUTE_110_MUDKIP, ARRAY_COUNT(sRival110Mudkip), sRival110Mudkip},
+    {TRAINER_MAY_ROUTE_110_TORCHIC, ARRAY_COUNT(sRival110Torchic), sRival110Torchic},
 };
 
 /* The team a trainer has now, or NULL: the setting must reach their class. */
@@ -95,7 +145,7 @@ static const struct Team *ActiveTeam(u16 trainerNum)
     if (scope == TEAMS_OFF || trainerNum >= TRAINERS_COUNT)
         return NULL;
     class = gTrainers[trainerNum].trainerClass;
-    if (class == TRAINER_CLASS_LEADER ? scope < TEAMS_LEADERS : scope < TEAMS_LEADERS_AND_ELITE_FOUR)
+    if (class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_RIVAL ? scope < TEAMS_LEADERS : scope < TEAMS_LEADERS_AND_ELITE_FOUR)
         return NULL;
     for (i = 0; i < ARRAY_COUNT(sTeams); i++)
         if (sTeams[i].trainerNum == trainerNum)

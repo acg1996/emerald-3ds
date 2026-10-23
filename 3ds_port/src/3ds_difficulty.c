@@ -31,12 +31,13 @@ enum
 #define IV_GOOD_MIN 25
 #define IV_PERFECT 31
 
-/* Gym leaders (and their rematches), the Elite Four and the Champion. */
+/* Gym leaders (and their rematches), the Elite Four, the Champion and the rival. */
 static bool8 IsLeaderOrEliteFour(u16 trainerNum)
 {
     u8 class = gTrainers[trainerNum].trainerClass;
 
-    return class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_ELITE_FOUR || class == TRAINER_CLASS_CHAMPION;
+    return class == TRAINER_CLASS_LEADER || class == TRAINER_CLASS_ELITE_FOUR || class == TRAINER_CLASS_CHAMPION
+        || class == TRAINER_CLASS_RIVAL;
 }
 
 /*
