@@ -58,6 +58,7 @@ t("XATU", "XATU", 0, "TIMID", "TWISTED_SPOON", ["PSYCHIC", "CALM_MIND", "WISH", 
 t("LUNATONE", "LUNATONE", 0, "MODEST", "SITRUS_BERRY", ["PSYCHIC", "CALM_MIND", "HYPNOSIS", "SHADOW_BALL"], ("hp", "spa"))
 t("SOLROCK", "SOLROCK", 0, "ADAMANT", "MIRACLE_SEED", ["SUNNY_DAY", "SOLAR_BEAM", "ROCK_SLIDE", "PSYCHIC"], ("hp", "spa"))
 t("GARDEVOIR", "GARDEVOIR", 1, "MODEST", "LUM_BERRY", ["CALM_MIND", "PSYCHIC", "SHADOW_BALL", "THUNDERBOLT"], ("spe", "spa"))
+t("CHIMECHO", "CHIMECHO", 0, "CALM", "MENTAL_HERB", ["PSYCHIC", "CALM_MIND", "HEAL_BELL", "SHADOW_BALL"], ("hp", "spd"))
 t("WHISCASH", "WHISCASH", 0, "CALM", "SITRUS_BERRY", ["RAIN_DANCE", "SURF", "EARTHQUAKE", "AMNESIA"], ("hp", "spd"))
 t("LUVDISC", "LUVDISC", 0, "TIMID", "SALAC_BERRY", ["SURF", "FLAIL", "AGILITY", "ATTRACT"], ("spe", "spa"))
 t("SEALEO", "SEALEO", 0, "CALM", "CHESTO_BERRY", ["ICE_BEAM", "SURF", "REST", "BODY_SLAM"], ("hp", "spd"))
@@ -214,7 +215,7 @@ team("WATTSON_1", ["WATTSON_1"], BASE, [("VOLTORB", 20), ("PLUSLE", 20), ("MAGNE
 team("FLANNERY_1", ["FLANNERY_1"], BASE, [("SLUGMA", 24), ("NUMEL", 24), ("MAGMAR", 25), ("CAMERUPT", 26), ("TORKOAL", 29)])
 team("NORMAN_1", ["NORMAN_1"], BASE, [("SPINDA", 27), ("VIGOROTH", 27), ("KECLEON", 28), ("LINOONE", 29), ("SLAKING", 31)])
 team("WINONA_1", ["WINONA_1"], BASE, [("SWABLU", 29), ("TROPIUS", 29), ("PELIPPER", 30), ("SKARMORY", 31), ("ALTARIA", 33)])
-team("TATE_AND_LIZA_1", ["TATE_AND_LIZA_1"], BASE, [("CLAYDOL", 41), ("XATU", 41), ("LUNATONE", 42), ("SOLROCK", 42), ("GARDEVOIR", 42)])
+team("TATE_AND_LIZA_1", ["TATE_AND_LIZA_1"], BASE, [("CLAYDOL", 41), ("XATU", 41), ("LUNATONE", 42), ("SOLROCK", 42), ("CHIMECHO", 42), ("GARDEVOIR", 42)])
 team("JUAN_1", ["JUAN_1"], BASE, [("WHISCASH", 41), ("LUVDISC", 41), ("SEALEO", 43), ("CRAWDAUNT", 43), ("KINGDRA", 46)])
 
 # Elite Four and Champion.
@@ -224,6 +225,8 @@ team("GLACIA", ["GLACIA"], ELITE, [("GLALIE", 50), ("SNEASEL", 50), ("JYNX", 52)
 team("DRAKE", ["DRAKE"], ELITE, [("FLYGON", 53), ("GYARADOS", 53), ("DRAGONITE", 54), ("LATIOS", 54), ("TYRANITAR", 54), ("SALAMENCE", 55)])
 team("WALLACE", ["WALLACE"], ELITE, [("WAILORD", 57), ("TENTACRUEL", 55), ("LUDICOLO", 56), ("STARMIE", 56), ("KYOGRE", 57), ("MILOTIC", 58)])
 
+# Tate and Liza are one double battle: the party goes out in pairs, so Claydol
+# (Earthquake hits the partner) leads with Xatu or Latias, who are immune.
 # Leader rematches. The game has four: they are the old third, fourth and
 # fifth, and a last one with every Pokemon at level 100.
 REMATCHES = {
@@ -265,9 +268,9 @@ REMATCHES = {
     ],
     "TATE_AND_LIZA": [
         [("DROWZEE", 53), ("SLOWPOKE", 53), ("CLAYDOL", 54), ("XATU", 54), ("LUNATONE", 55), ("SOLROCK", 55)],
-        [("HYPNO", 58), ("CLAYDOL", 59), ("XATU", 59), ("LATIAS", 59), ("LUNATONE", 60), ("SOLROCK", 60)],
-        [("HYPNO", 63), ("CLAYDOL", 64), ("LATIAS", 64), ("CELEBI", 65), ("LUNATONE", 65), ("SOLROCK", 65)],
-        [("CLAYDOL", 100), ("GARDEVOIR", 100), ("XATU", 100), ("SOLROCK", 100), ("CELEBI", 100), ("LATIAS", 100)],
+        [("CLAYDOL", 59), ("XATU", 59), ("HYPNO", 58), ("LATIAS", 59), ("LUNATONE", 60), ("SOLROCK", 60)],
+        [("CLAYDOL", 64), ("LATIAS", 64), ("HYPNO", 63), ("CELEBI", 65), ("LUNATONE", 65), ("SOLROCK", 65)],
+        [("CLAYDOL", 100), ("XATU", 100), ("GARDEVOIR", 100), ("SOLROCK", 100), ("CELEBI", 100), ("LATIAS", 100)],
     ],
     "JUAN": [
         [("POLIWHIRL", 50), ("WHISCASH", 51), ("LAPRAS", 52), ("WALREIN", 53), ("CRAWDAUNT", 53), ("KINGDRA", 56)],

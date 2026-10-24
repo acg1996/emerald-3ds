@@ -283,7 +283,12 @@ mantiene el nivel original, que es el tope.
 | Skarmory | 31 | Vista Lince | Pico Afilado | Ataque Aéreo, Ala de Acero, Agilidad, Tóxico |
 | Altaria | 33 | Cura Natural | Baya Lum | Danza Dragón, Terremoto, Garra Dragón, Ataque Aéreo |
 
-**Tate y Liza** (sol y luna, inmunes a Terremoto; combate doble; 5 Pokémon, tope 42)
+**Tate y Liza** (sol y luna, inmunes a Terremoto; combate doble; 6 Pokémon, tope 42). Es un
+solo entrenador en el juego, así que salen dos a la vez (3 parejas). Solo la primera pareja
+sale en el orden de la tabla: los relevos tras un KO los elige la IA. Terremoto golpea al
+compañero y la IA solo lo desaconseja un poco (-3) si no es inmune, por eso Claydol abre con
+Xatu y las revanchas 2 a 4 ponen a Claydol con Xatu o con Latias (Levitación). Gardevoir, que
+no es inmune, queda para el final.
 
 | Pokémon | Nv | Habilidad | Objeto | Movimientos |
 |---|---|---|---|---|
@@ -291,6 +296,7 @@ mantiene el nivel original, que es el tope.
 | Xatu | 41 | Sincronía | Cuchara Retorcida | Psíquico, Paz Mental, Deseo, Rayo Confuso |
 | Lunatone | 42 | Levitación | Baya Zidra | Psíquico, Paz Mental, Hipnosis, Bola Sombra |
 | Solrock | 42 | Levitación | Semilla Milagro | Día Soleado, Rayo Solar, Avalancha, Psíquico |
+| Chimecho | 42 | Levitación | Hierba Mental | Psíquico, Paz Mental, Campana Cura, Bola Sombra |
 | Gardevoir | 42 | Rastro | Baya Lum | Paz Mental, Psíquico, Bola Sombra, Rayo |
 
 **Juan** (lluvia con Nado Rápido; 5 Pokémon, tope 46)
