@@ -173,7 +173,9 @@ int32_t CtrDifficulty_ClampExp(const struct Pokemon *mon, int32_t exp)
 /*
  * The trainer AI. A smart trainer runs the sturdy scripts and, on top of what
  * they score, prefers a knock-out and a big hit, and raises its stats only
- * when it is safe to (it survives the target's best move, or two of them).
+ * when it is safe to (it survives the target's best move, or the best of both
+ * foes in a double battle). A move that hits the partner too is weighed by the
+ * damage the partner would take.
  * Like the game's own AI it reads the target's real moves.
  */
 enum
@@ -188,6 +190,11 @@ enum
 #define AI_SAFE_SETUP_BONUS 3
 #define AI_OK_SETUP_BONUS 1
 #define AI_UNSAFE_SETUP_PENALTY 4
+/* A move that hits the partner too: down if it would knock it out, or take half
+ * its health, up a little if the partner is immune. */
+#define AI_ALLY_KO_PENALTY 6
+#define AI_ALLY_HURT_PENALTY 3
+#define AI_ALLY_SPARED_BONUS 1
 /* Stat stages above the default a raised stat stops at (+2). */
 #define AI_SETUP_STAGE_CAP 2
 
@@ -291,6 +298,19 @@ static void AddScore(s8 *score, int delta)
     *score = value < 1 ? 1 : (value > 127 ? 127 : value);
 }
 
+/* The best damage every foe of the battler could do to it this turn: both
+ * foes in a double battle. */
+static s32 ThreatTo(u8 battler)
+{
+    s32 total = 0;
+    u8 i;
+
+    for (i = 0; i < gBattlersCount; i++)
+        if (GetBattlerSide(i) != GetBattlerSide(battler) && !(gAbsentBattlerFlags & (1 << i)) && gBattleMons[i].hp > 0)
+            total += BestDamage(i, battler);
+    return total;
+}
+
 void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
 {
     u16 savedMove = gCurrentMove;
@@ -301,18 +321,29 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
     u8 savedMultiplier = gBattleScripting.dmgMultiplier;
     u8 savedType = gBattleStruct->dynamicMoveType;
     s32 targetHp = gBattleMons[target].hp, myHp = gBattleMons[battler].hp;
+    u8 partner = BATTLE_PARTNER(battler);
+    bool8 partnerHere = (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && !(gAbsentBattlerFlags & (1 << partner))
+                        && gBattleMons[partner].hp > 0;
     s32 threat;
     bool8 canKo = FALSE;
     s32 damage[MAX_MON_MOVES];
+    s32 allyDamage[MAX_MON_MOVES];
     u8 i, stat;
 
-    if (!CtrAi_IsSmart(battler) || (gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+    /* A move aimed at the ally is not one the scripts want: the game drops it
+     * unless it scores 100. */
+    if (!CtrAi_IsSmart(battler) || GetBattlerSide(target) == GetBattlerSide(battler))
         return;
-    threat = BestDamage(target, battler);
+    threat = ThreatTo(battler);
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        damage[i] = scores[i] > 0 ? SimulatedDamage(battler, target, gBattleMons[battler].moves[i]) : 0;
-        if (damage[i] >= targetHp)
+        u16 move = gBattleMons[battler].moves[i];
+
+        damage[i] = scores[i] > 0 ? SimulatedDamage(battler, target, move) : 0;
+        /* Earthquake, Surf and the explosions also hit the partner. */
+        allyDamage[i] = (partnerHere && damage[i] > 0 && (gBattleMoves[move].target & MOVE_TARGET_FOES_AND_ALLY))
+                      ? SimulatedDamage(battler, partner, move) : -1;
+        if (damage[i] >= targetHp && (allyDamage[i] < 0 || allyDamage[i] < gBattleMons[partner].hp))
             canKo = TRUE;
     }
     for (i = 0; i < MAX_MON_MOVES; i++)
@@ -321,6 +352,23 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
 
         if (scores[i] <= 0 || move == MOVE_NONE)
             continue;
+        if (allyDamage[i] >= 0)
+        {
+            s32 partnerHp = gBattleMons[partner].hp;
+
+            if (allyDamage[i] >= partnerHp)
+            {
+                AddScore(&scores[i], -AI_ALLY_KO_PENALTY);
+                continue;
+            }
+            if (allyDamage[i] * 2 >= partnerHp)
+            {
+                AddScore(&scores[i], -AI_ALLY_HURT_PENALTY);
+                continue;
+            }
+            if (allyDamage[i] == 0)
+                AddScore(&scores[i], AI_ALLY_SPARED_BONUS);
+        }
         if (damage[i] >= targetHp)
             AddScore(&scores[i], AI_KO_BONUS);
         else if (damage[i] > 0 && damage[i] * 2 >= targetHp)

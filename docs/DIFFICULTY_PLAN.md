@@ -131,6 +131,23 @@ inteligente de objetos.
 - Es la parte más difícil de afinar: se prueba combatiendo, no solo
   compilando. Se hará en iteraciones cortas.
 
+**Mejora de la IA, por fases**
+
+- **A. Puntuación en combates dobles (hecha, sin probar jugando).** La capa de
+  `CtrAi_AdjustScores` (bono por KO y golpe fuerte, subidas solo si es seguro) se
+  aplica ahora también en dobles, una vez por objetivo, dentro del bucle de
+  `ChooseMoveOrAction_Doubles`. Si el objetivo es el compañero no hace nada. La
+  amenaza para subir estadísticas suma el mejor golpe de los dos rivales. Los
+  movimientos que golpean también al compañero (Terremoto, Surf, Autodestrucción)
+  pierden 6 si lo noquearían y 3 si le quitarían la mitad, y ganan 1 si es inmune.
+- **B. Relevos y cambios (pendiente).** Arreglar `GetMostSuitableMonToSwitchInto`
+  (elige al que más daño recibe y mira a un rival al azar en dobles) y añadir el
+  cambio proactivo. Los relevos tras un KO no salen en el orden de la lista: los
+  elige esa función. Falta decidir el orden: mejor matchup con el as al final.
+- **C. Clima (pendiente).** Poner el clima propio cuando conviene, premiar y
+  castigar movimientos según el clima activo, relevos que lo aprovechen y su
+  desgaste.
+
 ## 5. Aleatorizador (última fase)
 
 | Modo | Qué aleatoriza |

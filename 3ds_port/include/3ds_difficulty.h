@@ -35,9 +35,10 @@ bool CtrAi_IsSmart(uint8_t battler);
 /* The AI scripts a smart trainer always runs, added to its own. */
 uint32_t CtrAi_BaseFlags(void);
 /*
- * After the AI scripts have scored the moves in a single battle: more for a
- * move that knocks the target out or hits hard, and for a stat-raising move
- * only when the battler is not about to be knocked out.
+ * After the AI scripts have scored the moves against one target, in a single
+ * or a double battle: more for a move that knocks the target out or hits hard,
+ * for a stat-raising move only when the battler is not about to be knocked out,
+ * and less for a move that would hurt its own partner.
  */
 void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores);
 

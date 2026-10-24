@@ -37,6 +37,18 @@ Applied by tools/bootstrap.py after the localization.
  
      // Check special AI actions.
      if (AI_THINKING_STRUCT->aiAction & AI_ACTION_FLEE)
+@@ -505,6 +514,11 @@
+                 AI_THINKING_STRUCT->movesetIndex = 0;
+             }
+ 
++#ifdef PLATFORM_3DS
++            // Trainer AI (OPTIONS, DIFFICULTY): the same scoring per target in a double battle.
++            CtrAi_AdjustScores(sBattler_AI, gBattlerTarget, AI_THINKING_STRUCT->score);
++#endif
++
+             if (AI_THINKING_STRUCT->aiAction & AI_ACTION_FLEE)
+             {
+                 actionOrMoveIndex[i] = AI_CHOICE_FLEE;
 --- a/src/battle_ai_switch_items.c
 +++ b/src/battle_ai_switch_items.c
 @@ -1,4 +1,7 @@
