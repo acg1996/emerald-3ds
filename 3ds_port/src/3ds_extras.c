@@ -346,6 +346,8 @@ static void IvApply(void)
 
 static const char *const sDiffAi[] = {CTR_TEXT("ORIGINAL", "ORIGINAL", "ORIGINALE", "ORIGINALE"), CTR_TEXT("SMART: LEADERS", "MEJOR: LÍDERES", "AMÉL.: CHEFS", "MIGL.: CAPI"), CTR_TEXT("SMART: ALL", "MEJOR: TODOS", "AMÉL.: TOUS", "MIGL.: TUTTI")};
 
+static const char *const sDiffNuzlocke[] = {CTR_TEXT("OFF", "NO", "NON", "NO"), CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), CTR_TEXT("SOFTLOCKE", "SOFTLOCKE", "SOFTLOCKE", "SOFTLOCKE")};
+
 const CtrExtra gCtrExtras[] =
 {
     /* Features add their lines here. */
@@ -402,7 +404,7 @@ const CtrExtra gCtrExtras[] =
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("CURRENT CAP", "TOPE ACTUAL", "NIVEAU MAX ACT.", "LIV. MAX ATTUALE"), "diff_cap_now", 0, 0, NULL, NULL, NULL, LevelCapText},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("TRAINER AI", "IA ENTRENADORES", "IA DRESSEURS", "IA ALLENATORI"), "diff_ai", 3, 0, sDiffAi, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NEW TEAMS", "EQUIPOS NUEVOS", "NOUV. ÉQUIPES", "NUOVE SQUADRE"), "diff_teams", 3, 0, sDiffScope, NULL, NULL, NULL},
-    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), "diff_nuzlocke", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
+    {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("NUZLOCKE", "NUZLOCKE", "NUZLOCKE", "NUZLOCKE"), "diff_nuzlocke", 3, 0, sDiffNuzlocke, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("RANDOMIZER", "ALEATORIZADOR", "ALÉATOIRE", "RANDOMIZER"), "diff_random", 5, 0, sDiffRandom, RandomActed, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV BOOST", "MEJORA DE IV", "BOOST D'IV", "BOOST IV"), "diff_iv_boost", 2, 0, gCtrExtrasOffOn, NULL, NULL, NULL},
     {CTR_EXTRAS_DIFFICULTY, CTR_TEXT("IV BOOSTS", "MEJORAS DE IV", "BOOSTS D'IV", "BOOST IV"), "ivb_open", 0, 0, NULL, IvOpen, NULL, IvLeftText},

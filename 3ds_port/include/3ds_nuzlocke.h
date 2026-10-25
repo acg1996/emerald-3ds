@@ -4,6 +4,7 @@
 /*
  * The Nuzlocke rules (diff_nuzlocke, docs/DIFFICULTY_PLAN.md): one catch per
  * area, a fainted Pokémon is dead for good, and being defeated ends the run.
+ * The Softlocke (diff_nuzlocke = 2) is the same, but Revives bring the dead back.
  * The run's state is kept next to the save (3ds_nuz_store.h).
  *
  * Game translation units call these from the few hooks patches/difficulty/
@@ -24,8 +25,12 @@ bool CtrNuzlocke_CanCatch(void);
 void CtrNuzlocke_OnBattleEnd(bool defeated);
 /* Marks every fainted Pokémon of the party dead. */
 void CtrNuzlocke_ScanParty(void);
-/* A dead Pokémon: it is not healed, revived or given items. */
+/* A dead Pokémon: it is not healed by the Centers. In the Softlocke (setting 2)
+ * a revived one is alive again. */
 bool CtrNuzlocke_IsDead(const struct Pokemon *mon);
+/* Whether items are refused to the Pokémon: it is dead, and the setting is the
+ * Nuzlocke (setting 1); the Softlocke lets a Revive work. */
+bool CtrNuzlocke_BlocksItem(const struct Pokemon *mon);
 
 /* A new game starts a new run (new_game.c). */
 void CtrNuzlocke_Reset(void);

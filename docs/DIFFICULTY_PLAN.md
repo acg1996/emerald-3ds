@@ -454,6 +454,11 @@ sirven, ni ningún objeto); perder un combate falla el intento. El estado se
 guarda en `emerald3ds.nuz`, ligado al CRC de cada partida. Una zona gastada
 bloquea la Poké Ball con el aviso de "el entrenador bloquea la bola".
 
+**Softlocke** (`diff_nuzlocke` = Softlocke): las mismas reglas, pero los Revivir
+(y cualquier otro objeto) sí funcionan con un Pokémon muerto. Al revivir deja
+de estar muerto y el Centro Pokémon lo cura; si vuelve a debilitarse, muere de nuevo.
+Los cromáticos se pueden capturar siempre, en Nuzlocke y en Softlocke, sin gastar la zona.
+
 **Aleatorizador** (`diff_random`), con una semilla propia de cada partida:
 
 | Modo | Qué cambia |

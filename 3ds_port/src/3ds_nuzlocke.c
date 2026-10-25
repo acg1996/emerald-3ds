@@ -36,6 +36,12 @@ static bool8 Active(void)
     return CtrExtras_Get("diff_nuzlocke") != 0;
 }
 
+/* The Softlocke: the same rules, but a Revive brings a dead Pokémon back. */
+static bool8 Soft(void)
+{
+    return CtrExtras_Get("diff_nuzlocke") == 2;
+}
+
 static bool8 AreaUsed(u8 area)
 {
     return (sState.used[area / 8] >> (area % 8)) & 1;
@@ -71,12 +77,21 @@ bool CtrNuzlocke_IsDead(const struct Pokemon *mon)
 
     if (!Active() || GetMonData((struct Pokemon *)mon, MON_DATA_SPECIES, NULL) == SPECIES_NONE)
         return FALSE;
+    /* A Softlocke Pokémon that was revived is alive again (and dies if it faints anew). */
+    if (Soft() && GetMonData((struct Pokemon *)mon, MON_DATA_HP, NULL) != 0)
+        return FALSE;
     personality = GetMonData((struct Pokemon *)mon, MON_DATA_PERSONALITY, NULL);
     otId = GetMonData((struct Pokemon *)mon, MON_DATA_OT_ID, NULL);
     for (i = 0; i < sState.deadCount; i++)
         if (sState.dead[i][0] == personality && sState.dead[i][1] == otId)
             return TRUE;
     return FALSE;
+}
+
+bool CtrNuzlocke_BlocksItem(const struct Pokemon *mon)
+{
+    /* The Softlocke lets every item reach a dead Pokémon: only a Revive does anything. */
+    return !Soft() && CtrNuzlocke_IsDead(mon);
 }
 
 void CtrNuzlocke_ScanParty(void)

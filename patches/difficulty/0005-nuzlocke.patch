@@ -117,7 +117,7 @@ Applied by tools/bootstrap.py after the localization.
      u16 evCount;
  
 +#ifdef PLATFORM_3DS
-+    if (CtrNuzlocke_IsDead(mon)) // Nuzlocke: a dead Pokemon takes no item
++    if (CtrNuzlocke_BlocksItem(mon)) // Nuzlocke: a dead Pokemon takes no item
 +        return TRUE;
 +#endif
      // Get item hold effect
