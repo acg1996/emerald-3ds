@@ -49,5 +49,11 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores);
  */
 uint8_t CtrAi_BestSwitchIn(uint8_t battler);
 bool CtrAi_ShouldSwitchOut(uint8_t battler);
+/*
+ * Whether a smart trainer should spend its healing item on this battler now: once per
+ * Pokemon, when it is low, the item gives back a good part, and the foes would not
+ * undo it. Always true for the other trainers.
+ */
+bool CtrAi_ShouldHeal(uint8_t battler, int amount);
 
 #endif // CTR_DIFFICULTY_H

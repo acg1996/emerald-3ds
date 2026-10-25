@@ -884,3 +884,34 @@ bool CtrAi_ShouldSwitchOut(uint8_t battler)
     sLastSwitchTurn[battler] = turn + 1;
     return true;
 }
+
+/* A smart trainer heals a Pokémon only once, when it is below this much health ... */
+#define AI_HEAL_BELOW_PCT 40
+/* ... when the item gives back at least this much of it ... */
+#define AI_HEAL_MIN_PCT 25
+/* ... and not when the foes would undo it or the Pokémon is about to win. */
+static u8 sHealed[PARTY_SIZE];
+
+bool CtrAi_ShouldHeal(uint8_t battler, int amount)
+{
+    u8 slot = gBattlerPartyIndexes[battler];
+    s32 hp = gBattleMons[battler].hp, maxHp = gBattleMons[battler].maxHP;
+    s32 restored = amount < maxHp - hp ? amount : maxHp - hp;
+    s32 threat;
+    u8 foe = BATTLE_OPPOSITE(battler);
+
+    if (!CtrAi_IsSmart(battler))
+        return true;
+    if (gBattleResults.battleTurnCounter == 0)
+        memset(sHealed, 0, sizeof(sHealed));
+    if (slot >= PARTY_SIZE || sHealed[slot] || hp * 100 >= maxHp * AI_HEAL_BELOW_PCT
+     || restored * 100 < maxHp * AI_HEAL_MIN_PCT)
+        return false;
+    threat = ThreatTo(battler);
+    if (threat >= hp + restored)
+        return false;
+    if (threat < hp && !(gAbsentBattlerFlags & (1 << foe)) && BestDamage(battler, foe) >= gBattleMons[foe].hp)
+        return false;
+    sHealed[slot] = 1;
+    return true;
+}

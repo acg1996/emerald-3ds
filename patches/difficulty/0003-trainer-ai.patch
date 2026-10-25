@@ -59,7 +59,7 @@ Applied by tools/bootstrap.py after the localization.
  #include "battle.h"
  #include "battle_anim.h"
  #include "battle_controllers.h"
-@@ -17,6 +20,14 @@
+@@ -17,6 +20,14 @@ static bool8 HasSuperEffectiveMoveAgainstOpponents(bool8 noRng);
  static bool8 FindMonWithFlagsAndSuperEffective(u8 flags, u8 moduloPercent);
  static bool8 ShouldUseItem(void);
  
@@ -74,7 +74,7 @@ Applied by tools/bootstrap.py after the localization.
  static bool8 ShouldSwitchIfPerishSong(void)
  {
      if (gStatuses3[gActiveBattler] & STATUS3_PERISH_SONG
-@@ -518,8 +529,14 @@
+@@ -518,10 +529,16 @@ static bool8 ShouldSwitch(void)
          return FALSE;
      if (AreStatsRaised())
          return FALSE;
@@ -91,7 +91,9 @@ Applied by tools/bootstrap.py after the localization.
 +#endif
 +
      return FALSE;
-@@ -648,6 +665,17 @@
+ }
+ 
+@@ -648,6 +665,17 @@ u8 GetMostSuitableMonToSwitchInto(void)
      if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
          return gBattlerPartyIndexes[gActiveBattler] + 1;
  
@@ -109,3 +111,28 @@ Applied by tools/bootstrap.py after the localization.
      if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
      {
          battlerIn1 = gActiveBattler;
+@@ -859,6 +887,10 @@ static bool8 ShouldUseItem(void)
+                 break;
+             if (gBattleMons[gActiveBattler].hp == 0)
+                 break;
++#ifdef PLATFORM_3DS
++            if (!CtrAi_ShouldHeal(gActiveBattler, gBattleMons[gActiveBattler].maxHP))
++                break;
++#endif
+             shouldUse = TRUE;
+             break;
+         case AI_ITEM_HEAL_HP:
+@@ -868,7 +900,13 @@ static bool8 ShouldUseItem(void)
+             if (gBattleMons[gActiveBattler].hp == 0)
+                 break;
+             if (gBattleMons[gActiveBattler].hp < gBattleMons[gActiveBattler].maxHP / 4 || gBattleMons[gActiveBattler].maxHP - gBattleMons[gActiveBattler].hp > itemEffects[paramOffset])
++            {
++#ifdef PLATFORM_3DS
++                if (!CtrAi_ShouldHeal(gActiveBattler, itemEffects[paramOffset]))
++                    break;
++#endif
+                 shouldUse = TRUE;
++            }
+             break;
+         case AI_ITEM_CURE_CONDITION:
+             *(gBattleStruct->AI_itemFlags + gActiveBattler / 2) = 0;
