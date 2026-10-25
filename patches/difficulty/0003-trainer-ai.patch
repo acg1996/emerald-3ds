@@ -74,7 +74,7 @@ Applied by tools/bootstrap.py after the localization.
  static bool8 ShouldSwitchIfPerishSong(void)
  {
      if (gStatuses3[gActiveBattler] & STATUS3_PERISH_SONG
-@@ -518,8 +529,8 @@
+@@ -518,8 +529,14 @@
          return FALSE;
      if (AreStatsRaised())
          return FALSE;
@@ -84,4 +84,28 @@ Applied by tools/bootstrap.py after the localization.
 +        || FindMonWithFlagsAndSuperEffective(MOVE_RESULT_NOT_VERY_EFFECTIVE, AI_SWITCH_ODDS(3)))
          return TRUE;
  
++#ifdef PLATFORM_3DS
++    // Trainer AI (OPTIONS, DIFFICULTY): switch out of a matchup it cannot win.
++    if (CtrAi_ShouldSwitchOut(gActiveBattler))
++        return TRUE;
++#endif
++
      return FALSE;
+@@ -648,6 +665,17 @@
+     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
+         return gBattlerPartyIndexes[gActiveBattler] + 1;
+ 
++#ifdef PLATFORM_3DS
++    // Trainer AI (OPTIONS, DIFFICULTY): a smart trainer sends in the Pokemon that fares best.
++    if (CtrAi_IsSmart(gActiveBattler))
++    {
++        u8 chosen = CtrAi_BestSwitchIn(gActiveBattler);
++
++        if (chosen != PARTY_SIZE)
++            return chosen;
++    }
++#endif
++
+     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+     {
+         battlerIn1 = gActiveBattler;

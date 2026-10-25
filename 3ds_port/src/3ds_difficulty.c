@@ -3,6 +3,7 @@
  * docs/DIFFICULTY_PLAN.md). A game translation unit: it reads the trainer
  * tables and the Pokémon the battle built.
  */
+#include <string.h>
 #include "global.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -391,4 +392,266 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
     gCritMultiplier = savedCrit;
     gBattleScripting.dmgMultiplier = savedMultiplier;
     gBattleStruct->dynamicMoveType = savedType;
+}
+
+/*
+ * Switching. A smart trainer sends in the Pokémon that fares best against the
+ * foes on the field (the game's own pick takes the one that suffers most),
+ * keeps its last Pokémon, the ace, back until two are left, and switches out a
+ * Pokémon that cannot hurt the foes and is about to be hurt by them. Damage is
+ * an estimate from the stats and moves, in percent of the defender's health.
+ */
+struct Fighter
+{
+    u16 species;
+    u16 atk, spAtk, def, spDef, speed, hp;
+    u16 moves[MAX_MON_MOVES];
+    u8 ability, level;
+    u8 types[2];
+};
+
+/* Switch out when the foes would take this much, or more, of its health ... */
+#define AI_SWITCH_HURT_PCT 50
+/* ... and none of its moves does this much to a foe ... */
+#define AI_SWITCH_THREAT_PCT 40
+/* ... a Pokémon in the party is this much better ... */
+#define AI_SWITCH_MARGIN 50
+/* ... and survives a hit (the foes take a free turn). */
+#define AI_SWITCH_SURVIVE_PCT 60
+/* Turns before a trainer's Pokémon may switch out by choice again. */
+#define AI_SWITCH_COOLDOWN 3
+/* A damage estimate is capped so one huge hit does not decide the score. */
+#define AI_PCT_CAP 150
+
+static u8 sLastSwitchTurn[MAX_BATTLERS_COUNT];
+
+static void FighterOfBattler(struct Fighter *f, u8 battler)
+{
+    const struct BattlePokemon *mon = &gBattleMons[battler];
+    u8 i;
+
+    f->species = mon->species;
+    f->atk = mon->attack;
+    f->spAtk = mon->spAttack;
+    f->def = mon->defense;
+    f->spDef = mon->spDefense;
+    f->speed = mon->speed;
+    f->hp = mon->hp;
+    f->ability = mon->ability;
+    f->level = mon->level;
+    f->types[0] = mon->types[0];
+    f->types[1] = mon->types[1];
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        f->moves[i] = mon->moves[i];
+}
+
+static void FighterOfMon(struct Fighter *f, struct Pokemon *mon)
+{
+    u8 i;
+
+    f->species = GetMonData(mon, MON_DATA_SPECIES);
+    f->atk = GetMonData(mon, MON_DATA_ATK);
+    f->spAtk = GetMonData(mon, MON_DATA_SPATK);
+    f->def = GetMonData(mon, MON_DATA_DEF);
+    f->spDef = GetMonData(mon, MON_DATA_SPDEF);
+    f->speed = GetMonData(mon, MON_DATA_SPEED);
+    f->hp = GetMonData(mon, MON_DATA_HP);
+    f->ability = GetMonAbility(mon);
+    f->level = GetMonData(mon, MON_DATA_LEVEL);
+    f->types[0] = gSpeciesInfo[f->species].types[0];
+    f->types[1] = gSpeciesInfo[f->species].types[1];
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        f->moves[i] = GetMonData(mon, MON_DATA_MOVE1 + i);
+}
+
+/* What one move of a does to d, in percent of d's health. */
+static s32 PctOfMove(const struct Fighter *a, const struct Fighter *d, u16 move)
+{
+    u8 type, flags;
+    s32 atk, def, damage;
+
+    if (move == MOVE_NONE || gBattleMoves[move].power < 2)
+        return 0;
+    type = gBattleMoves[move].type;
+    flags = AI_TypeCalc(move, d->species, d->ability);
+    if (flags & MOVE_RESULT_DOESNT_AFFECT_FOE)
+        return 0;
+    atk = IS_TYPE_PHYSICAL(type) ? a->atk : a->spAtk;
+    def = IS_TYPE_PHYSICAL(type) ? d->def : d->spDef;
+    damage = (2 * a->level / 5 + 2) * gBattleMoves[move].power * atk / (def > 0 ? def : 1) / 50 + 2;
+    if (type == a->types[0] || type == a->types[1])
+        damage = damage * 3 / 2;
+    flags &= MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE;
+    if (flags == MOVE_RESULT_SUPER_EFFECTIVE)
+        damage *= 2;
+    else if (flags == MOVE_RESULT_NOT_VERY_EFFECTIVE)
+        damage /= 2;
+    damage = damage * 100 / (d->hp > 0 ? d->hp : 1);
+    return damage > AI_PCT_CAP ? AI_PCT_CAP : damage;
+}
+
+static s32 BestPct(const struct Fighter *a, const struct Fighter *d)
+{
+    s32 best = 0;
+    u8 i;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        s32 pct = PctOfMove(a, d, a->moves[i]);
+
+        if (pct > best)
+            best = pct;
+    }
+    return best;
+}
+
+/* How f fares against the foes of the battler: what it does minus what it takes,
+ * averaged over the foes, and the most it does and takes to any one of them. */
+static s32 ScoreAgainstFoes(const struct Fighter *f, u8 battler, s32 *dealtMax, s32 *takenMax)
+{
+    s32 total = 0, foes = 0;
+    u8 i;
+
+    *dealtMax = 0;
+    *takenMax = 0;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        struct Fighter foe;
+        s32 dealt, taken, score;
+
+        if (GetBattlerSide(i) == GetBattlerSide(battler) || (gAbsentBattlerFlags & (1 << i)) || gBattleMons[i].hp == 0)
+            continue;
+        FighterOfBattler(&foe, i);
+        dealt = BestPct(f, &foe);
+        taken = BestPct(&foe, f);
+        score = dealt - taken;
+        if (dealt >= 100 && (f->speed > foe.speed || taken < 100))
+            score += 40;
+        if (taken >= 100 && !(dealt >= 100 && f->speed > foe.speed))
+            score -= 40;
+        total += score;
+        foes++;
+        if (dealt > *dealtMax)
+            *dealtMax = dealt;
+        if (taken > *takenMax)
+            *takenMax = taken;
+    }
+    return foes ? total / foes : 0;
+}
+
+static void PartyRange(u8 battler, u8 *first, u8 *last)
+{
+    if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
+    {
+        *first = (battler & BIT_FLANK) == B_FLANK_LEFT ? 0 : PARTY_SIZE / 2;
+        *last = (battler & BIT_FLANK) == B_FLANK_LEFT ? PARTY_SIZE / 2 : PARTY_SIZE;
+    }
+    else
+    {
+        *first = 0;
+        *last = PARTY_SIZE;
+    }
+}
+
+/* The party slot to send in, or PARTY_SIZE when there is none to choose. */
+static u8 PickSwitchIn(u8 battler, s32 *bestScore, s32 *bestDealt, s32 *bestTaken)
+{
+    u8 partner = BATTLE_PARTNER(battler);
+    bool8 partnerHere = (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && !(gAbsentBattlerFlags & (1 << partner));
+    u8 eligible[PARTY_SIZE];
+    u8 first, last, ace = PARTY_SIZE, count = 0, alive = 0, best = PARTY_SIZE, i, j;
+
+    PartyRange(battler, &first, &last);
+    for (i = first; i < last; i++)
+    {
+        u16 species = GetMonData(&gEnemyParty[i], MON_DATA_SPECIES_OR_EGG);
+
+        if (species == SPECIES_NONE || species == SPECIES_EGG)
+            continue;
+        ace = i;
+        if (GetMonData(&gEnemyParty[i], MON_DATA_HP) == 0)
+            continue;
+        alive++;
+        if (i == gBattlerPartyIndexes[battler] || i == gBattleStruct->monToSwitchIntoId[battler]
+         || (partnerHere && (i == gBattlerPartyIndexes[partner] || i == gBattleStruct->monToSwitchIntoId[partner])))
+            continue;
+        eligible[count++] = i;
+    }
+    /* The ace stays in the back while the team still has more than two. */
+    if (count > 1 && alive > 2)
+        for (i = 0; i < count; i++)
+            if (eligible[i] == ace)
+            {
+                eligible[i] = eligible[--count];
+                break;
+            }
+    *bestScore = -10000;
+    *bestDealt = 0;
+    *bestTaken = 0;
+    for (i = 0; i < count; i++)
+    {
+        struct Fighter f;
+        s32 dealt, taken, score;
+
+        FighterOfMon(&f, &gEnemyParty[eligible[i]]);
+        score = ScoreAgainstFoes(&f, battler, &dealt, &taken);
+        /* A partner's Earthquake or Surf would hit the one that comes in. */
+        if (partnerHere && gBattleMons[partner].hp > 0)
+        {
+            struct Fighter p;
+            s32 worst = 0;
+
+            FighterOfBattler(&p, partner);
+            for (j = 0; j < MAX_MON_MOVES; j++)
+                if (p.moves[j] != MOVE_NONE && (gBattleMoves[p.moves[j]].target & MOVE_TARGET_FOES_AND_ALLY))
+                {
+                    s32 pct = PctOfMove(&p, &f, p.moves[j]);
+
+                    if (pct > worst)
+                        worst = pct;
+                }
+            if (worst >= 100)
+                score -= 80;
+            else if (worst >= 50)
+                score -= 40;
+        }
+        if (score > *bestScore)
+        {
+            *bestScore = score;
+            *bestDealt = dealt;
+            *bestTaken = taken;
+            best = eligible[i];
+        }
+    }
+    return best;
+}
+
+uint8_t CtrAi_BestSwitchIn(uint8_t battler)
+{
+    s32 score, dealt, taken;
+
+    return PickSwitchIn(battler, &score, &dealt, &taken);
+}
+
+bool CtrAi_ShouldSwitchOut(uint8_t battler)
+{
+    struct Fighter cur;
+    s32 curScore, curDealt, curTaken, bestScore, bestDealt, bestTaken;
+    u8 turn = gBattleResults.battleTurnCounter;
+
+    if (!CtrAi_IsSmart(battler))
+        return false;
+    if (turn == 0)
+        memset(sLastSwitchTurn, 0, sizeof(sLastSwitchTurn));
+    if (sLastSwitchTurn[battler] != 0 && turn + 1 - sLastSwitchTurn[battler] < AI_SWITCH_COOLDOWN)
+        return false;
+    FighterOfBattler(&cur, battler);
+    curScore = ScoreAgainstFoes(&cur, battler, &curDealt, &curTaken);
+    if (curTaken < AI_SWITCH_HURT_PCT || curDealt >= AI_SWITCH_THREAT_PCT)
+        return false;
+    if (PickSwitchIn(battler, &bestScore, &bestDealt, &bestTaken) == PARTY_SIZE
+     || bestScore < curScore + AI_SWITCH_MARGIN || bestTaken >= AI_SWITCH_SURVIVE_PCT)
+        return false;
+    sLastSwitchTurn[battler] = turn + 1;
+    return true;
 }

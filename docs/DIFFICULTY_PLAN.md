@@ -140,10 +140,19 @@ inteligente de objetos.
   amenaza para subir estadísticas suma el mejor golpe de los dos rivales. Los
   movimientos que golpean también al compañero (Terremoto, Surf, Autodestrucción)
   pierden 6 si lo noquearían y 3 si le quitarían la mitad, y ganan 1 si es inmune.
-- **B. Relevos y cambios (pendiente).** Arreglar `GetMostSuitableMonToSwitchInto`
-  (elige al que más daño recibe y mira a un rival al azar en dobles) y añadir el
-  cambio proactivo. Los relevos tras un KO no salen en el orden de la lista: los
-  elige esa función. Falta decidir el orden: mejor matchup con el as al final.
+- **B. Relevos y cambios (hecha, sin probar jugando).** El relevo lo elige
+  `CtrAi_BestSwitchIn` en lugar de `GetMostSuitableMonToSwitchInto` (que elige al
+  que más daño recibe y mira a un rival al azar en dobles). Puntúa a cada Pokémon
+  del banquillo con una estimación de daño por porcentaje de vida: lo que hace a
+  los rivales en el campo menos lo que recibe, con bono si noquea primero. Pesa
+  los dos rivales en dobles y descuenta si el Terremoto o el Surf del compañero
+  lo golpearía. El **as** (el último de la lista) no sale mientras queden más de
+  dos Pokémon vivos. Además, `CtrAi_ShouldSwitchOut` cambia a un Pokémon que
+  recibiría el 50 % o más, no hace el 40 % a ningún rival y tiene un relevo mucho
+  mejor (diferencia de 50 puntos) que sobrevive a un golpe; no repite el cambio
+  en 3 turnos. Solo actúa si no hay movimiento superefectivo ni estadísticas
+  subidas, como el cambio del juego. Los números están en `3ds_difficulty.c`
+  (`AI_SWITCH_*`) y se ajustan combatiendo.
 - **C. Clima (pendiente).** Poner el clima propio cuando conviene, premiar y
   castigar movimientos según el clima activo, relevos que lo aprovechen y su
   desgaste.

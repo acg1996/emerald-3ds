@@ -41,5 +41,13 @@ uint32_t CtrAi_BaseFlags(void);
  * and less for a move that would hurt its own partner.
  */
 void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores);
+/*
+ * Switching, for a smart trainer. The party slot to send in for this battler (the
+ * one that fares best against the foes, the ace held back until two are left), or
+ * 6 for none; and whether the battler should switch out now: it cannot hurt the
+ * foes, they are about to hurt it, and a Pokemon in the party is clearly better.
+ */
+uint8_t CtrAi_BestSwitchIn(uint8_t battler);
+bool CtrAi_ShouldSwitchOut(uint8_t battler);
 
 #endif // CTR_DIFFICULTY_H
