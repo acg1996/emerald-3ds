@@ -3,6 +3,7 @@
  * map, the trainer tables and the party.
  */
 #include "global.h"
+#include "battle.h"
 #include "data.h"
 #include "pokemon.h"
 #include "constants/abilities.h"
@@ -200,9 +201,17 @@ void CtrRandom_Party(struct Pokemon *party, uint8_t count, uint16_t trainerNum)
     }
 }
 
+/* Wally's catching lesson is the same on every run: its Ralts is built while this is set. */
+static bool8 sTutorial;
+
+void CtrRandom_Tutorial(int on)
+{
+    sTutorial = on != 0;
+}
+
 uint16_t CtrRandom_Ability(uint16_t species, uint8_t slot, uint16_t ability)
 {
-    if (Mode() < RANDOM_ABILITIES_AND_MOVES || ability == ABILITY_NONE)
+    if (Mode() < RANDOM_ABILITIES_AND_MOVES || ability == ABILITY_NONE || (gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL))
         return ability;
     return 1 + Hash(species, slot, 2) % (ABILITIES_COUNT - 1);
 }
@@ -211,7 +220,7 @@ uint16_t CtrRandom_Move(uint16_t species, uint16_t move)
 {
     u16 random;
 
-    if (Mode() < RANDOM_ABILITIES_AND_MOVES || move == MOVE_NONE)
+    if (Mode() < RANDOM_ABILITIES_AND_MOVES || move == MOVE_NONE || sTutorial)
         return move;
     random = 1 + (Hash(species, move, 3) >> 8) % (MOVES_COUNT - 1);
     return random == MOVE_STRUGGLE ? MOVE_TACKLE : random;

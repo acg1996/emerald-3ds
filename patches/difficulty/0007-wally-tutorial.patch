@@ -1,0 +1,21 @@
+Emerald 3DS difficulty: Wally's catching lesson is the same on every run.
+
+Applied by tools/bootstrap.py after the localization.
+
+--- a/src/battle_setup.c
++++ b/src/battle_setup.c
+@@ -488,7 +488,14 @@
+ // Initiates battle where Wally catches Ralts
+ void StartWallyTutorialBattle(void)
+ {
++#ifdef PLATFORM_3DS
++    extern void CtrRandom_Tutorial(int on); // the randomizer leaves this Ralts alone
++    CtrRandom_Tutorial(1);
++#endif
+     CreateMaleMon(&gEnemyParty[0], SPECIES_RALTS, 5);
++#ifdef PLATFORM_3DS
++    CtrRandom_Tutorial(0);
++#endif
+     LockPlayerFieldControls();
+     gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
+     gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;

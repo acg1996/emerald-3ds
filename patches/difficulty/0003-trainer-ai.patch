@@ -74,7 +74,7 @@ Applied by tools/bootstrap.py after the localization.
  static bool8 ShouldSwitchIfPerishSong(void)
  {
      if (gStatuses3[gActiveBattler] & STATUS3_PERISH_SONG
-@@ -518,10 +529,16 @@ static bool8 ShouldSwitch(void)
+@@ -518,10 +529,21 @@ static bool8 ShouldSwitch(void)
          return FALSE;
      if (AreStatsRaised())
          return FALSE;
@@ -87,13 +87,18 @@ Applied by tools/bootstrap.py after the localization.
 +#ifdef PLATFORM_3DS
 +    // Trainer AI (OPTIONS, DIFFICULTY): switch out of a matchup it cannot win.
 +    if (CtrAi_ShouldSwitchOut(gActiveBattler))
++    {
++        // Like the game's own switches: ask the engine for the switch, the Pokemon is picked after.
++        *(gBattleStruct->AI_monToSwitchIntoId + gActiveBattler) = PARTY_SIZE;
++        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_SWITCH, 0);
 +        return TRUE;
++    }
 +#endif
 +
      return FALSE;
  }
  
-@@ -648,6 +665,17 @@ u8 GetMostSuitableMonToSwitchInto(void)
+@@ -648,6 +670,17 @@ u8 GetMostSuitableMonToSwitchInto(void)
      if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
          return gBattlerPartyIndexes[gActiveBattler] + 1;
  
@@ -111,7 +116,7 @@ Applied by tools/bootstrap.py after the localization.
      if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
      {
          battlerIn1 = gActiveBattler;
-@@ -859,6 +887,10 @@ static bool8 ShouldUseItem(void)
+@@ -859,6 +892,10 @@ static bool8 ShouldUseItem(void)
                  break;
              if (gBattleMons[gActiveBattler].hp == 0)
                  break;
@@ -122,7 +127,7 @@ Applied by tools/bootstrap.py after the localization.
              shouldUse = TRUE;
              break;
          case AI_ITEM_HEAL_HP:
-@@ -868,7 +900,13 @@ static bool8 ShouldUseItem(void)
+@@ -868,7 +905,13 @@ static bool8 ShouldUseItem(void)
              if (gBattleMons[gActiveBattler].hp == 0)
                  break;
              if (gBattleMons[gActiveBattler].hp < gBattleMons[gActiveBattler].maxHP / 4 || gBattleMons[gActiveBattler].maxHP - gBattleMons[gActiveBattler].hp > itemEffects[paramOffset])

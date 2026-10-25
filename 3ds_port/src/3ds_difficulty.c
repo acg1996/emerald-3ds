@@ -22,6 +22,7 @@
 #include "constants/trainers.h"
 #include "3ds_extras.h"
 #include "3ds_difficulty.h"
+#include "3ds_log.h"
 #include "3ds_trainer_teams.h"
 
 enum
@@ -339,6 +340,7 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
      * unless it scores 100. */
     if (!CtrAi_IsSmart(battler) || GetBattlerSide(target) == GetBattlerSide(battler))
         return;
+    CtrLog_Write(CTR_LOG_GAME, "AI scores in: b%u->b%u %d %d %d %d", battler, target, scores[0], scores[1], scores[2], scores[3]);
     threat = ThreatTo(battler);
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
@@ -397,6 +399,7 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
     gCritMultiplier = savedCrit;
     gBattleScripting.dmgMultiplier = savedMultiplier;
     gBattleStruct->dynamicMoveType = savedType;
+    CtrLog_Write(CTR_LOG_GAME, "AI scores out: %d %d %d %d", scores[0], scores[1], scores[2], scores[3]);
 }
 
 /*
@@ -857,8 +860,11 @@ static u8 PickSwitchIn(u8 battler, s32 *bestScore, s32 *bestDealt, s32 *bestTake
 uint8_t CtrAi_BestSwitchIn(uint8_t battler)
 {
     s32 score, dealt, taken;
+    u8 best;
 
-    return PickSwitchIn(battler, &score, &dealt, &taken);
+    best = PickSwitchIn(battler, &score, &dealt, &taken);
+    CtrLog_Write(CTR_LOG_GAME, "AI best switch-in: b%u -> %u", battler, best);
+    return best;
 }
 
 bool CtrAi_ShouldSwitchOut(uint8_t battler)
@@ -873,6 +879,7 @@ bool CtrAi_ShouldSwitchOut(uint8_t battler)
         memset(sLastSwitchTurn, 0, sizeof(sLastSwitchTurn));
     if (sLastSwitchTurn[battler] != 0 && turn + 1 - sLastSwitchTurn[battler] < AI_SWITCH_COOLDOWN)
         return false;
+    CtrLog_Write(CTR_LOG_GAME, "AI should switch? b%u turn %u", battler, turn);
     RefreshWeather();
     FighterOfBattler(&cur, battler);
     curScore = ScoreAgainstFoes(&cur, battler, &curDealt, &curTaken);
@@ -882,6 +889,7 @@ bool CtrAi_ShouldSwitchOut(uint8_t battler)
      || bestScore < curScore + AI_SWITCH_MARGIN || bestTaken >= AI_SWITCH_SURVIVE_PCT)
         return false;
     sLastSwitchTurn[battler] = turn + 1;
+    CtrLog_Write(CTR_LOG_GAME, "AI switch out: b%u turn %u", battler, turn);
     return true;
 }
 
@@ -913,5 +921,6 @@ bool CtrAi_ShouldHeal(uint8_t battler, int amount)
     if (threat < hp && !(gAbsentBattlerFlags & (1 << foe)) && BestDamage(battler, foe) >= gBattleMons[foe].hp)
         return false;
     sHealed[slot] = 1;
+    CtrLog_Write(CTR_LOG_GAME, "AI heal: b%u hp %d/%d +%d", battler, (int)hp, (int)maxHp, (int)restored);
     return true;
 }

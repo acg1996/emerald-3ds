@@ -27,5 +27,7 @@ uint16_t CtrRandom_Gift(uint16_t species);
 /* A species' ability in this slot, and a move it learns by level. */
 uint16_t CtrRandom_Ability(uint16_t species, uint8_t slot, uint16_t ability);
 uint16_t CtrRandom_Move(uint16_t species, uint16_t move);
+/* Wally's Ralts is built with the moves it always had: set while it is made. */
+void CtrRandom_Tutorial(int on);
 
 #endif // CTR_RANDOM_H
