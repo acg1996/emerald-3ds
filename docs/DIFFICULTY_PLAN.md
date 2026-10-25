@@ -153,9 +153,20 @@ inteligente de objetos.
   en 3 turnos. Solo actúa si no hay movimiento superefectivo ni estadísticas
   subidas, como el cambio del juego. Los números están en `3ds_difficulty.c`
   (`AI_SWITCH_*`) y se ajustan combatiendo.
-- **C. Clima (pendiente).** Poner el clima propio cuando conviene, premiar y
-  castigar movimientos según el clima activo, relevos que lo aprovechen y su
-  desgaste.
+- **C. Clima (hecha, sin probar jugando).** Todo en `3ds_difficulty.c`, sin
+  parches nuevos. Cada clima vale lo que ganan los Pokémon vivos del equipo
+  (Nado Rápido +2 con lluvia, Clorofila +2 con sol, tipo Agua con lluvia, Fuego
+  con sol, tipos inmunes a la arena, Hielo con granizo; Rayo Solar, Síntesis y
+  similares con sol) menos lo que ganan los rivales en el campo, que cuentan
+  doble. Danza Lluvia, Día Soleado, Tempestad Arena y Granizo suben o bajan hasta
+  5 puntos según cuánto mejora ese clima sobre el actual, no se usan si hay un
+  movimiento que noquea, y se renuevan cuando al clima le queda un turno. Rayo
+  Solar gana 2 con sol y pierde 2 con lluvia, arena o granizo; Trueno gana 1 con
+  lluvia y pierde 1 con sol; Síntesis, Luz Lunar y Sol Matinal ganan 1 con sol y
+  pierden 2 con otro clima. El estimador de daño de los relevos cuenta el clima
+  (Agua y Fuego ×1,5 o ×0,5, Rayo Solar a la mitad), duplica la velocidad con
+  Nado Rápido y Clorofila, y resta 8 al relevo que entra a sufrir arena o
+  granizo.
 
 ## 5. Aleatorizador (última fase)
 

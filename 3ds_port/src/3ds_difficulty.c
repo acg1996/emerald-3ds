@@ -9,9 +9,11 @@
 #include "battle_anim.h"
 #include "battle_setup.h"
 #include "battle_script_commands.h"
+#include "battle_util.h"
 #include "data.h"
 #include "pokemon.h"
 #include "event_data.h"
+#include "constants/abilities.h"
 #include "constants/battle.h"
 #include "constants/battle_ai.h"
 #include "constants/battle_move_effects.h"
@@ -312,6 +314,8 @@ static s32 ThreatTo(u8 battler)
     return total;
 }
 
+static s32 WeatherMoveAdjust(u8 battler, u16 move, bool8 canKo);
+
 void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
 {
     u16 savedMove = gCurrentMove;
@@ -384,6 +388,7 @@ void CtrAi_AdjustScores(uint8_t battler, uint8_t target, int8_t *scores)
             else
                 AddScore(&scores[i], AI_OK_SETUP_BONUS);
         }
+        AddScore(&scores[i], WeatherMoveAdjust(battler, move, canKo));
     }
     gCurrentMove = savedMove;
     gBattleMoveDamage = savedDamage;
@@ -424,6 +429,10 @@ struct Fighter
 #define AI_PCT_CAP 150
 
 static u8 sLastSwitchTurn[MAX_BATTLERS_COUNT];
+/* The weather in effect, one of WX_*, read again before each decision. */
+static u8 sWeather;
+static u16 WeatherSpeed(const struct Fighter *f);
+static s32 WeatherDamage16(u8 type, u16 move);
 
 static void FighterOfBattler(struct Fighter *f, u8 battler)
 {
@@ -443,6 +452,7 @@ static void FighterOfBattler(struct Fighter *f, u8 battler)
     f->types[1] = mon->types[1];
     for (i = 0; i < MAX_MON_MOVES; i++)
         f->moves[i] = mon->moves[i];
+    f->speed = WeatherSpeed(f);
 }
 
 static void FighterOfMon(struct Fighter *f, struct Pokemon *mon)
@@ -462,6 +472,7 @@ static void FighterOfMon(struct Fighter *f, struct Pokemon *mon)
     f->types[1] = gSpeciesInfo[f->species].types[1];
     for (i = 0; i < MAX_MON_MOVES; i++)
         f->moves[i] = GetMonData(mon, MON_DATA_MOVE1 + i);
+    f->speed = WeatherSpeed(f);
 }
 
 /* What one move of a does to d, in percent of d's health. */
@@ -481,6 +492,7 @@ static s32 PctOfMove(const struct Fighter *a, const struct Fighter *d, u16 move)
     damage = (2 * a->level / 5 + 2) * gBattleMoves[move].power * atk / (def > 0 ? def : 1) / 50 + 2;
     if (type == a->types[0] || type == a->types[1])
         damage = damage * 3 / 2;
+    damage = damage * WeatherDamage16(type, move) / 16;
     flags &= MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE;
     if (flags == MOVE_RESULT_SUPER_EFFECTIVE)
         damage *= 2;
@@ -553,6 +565,221 @@ static void PartyRange(u8 battler, u8 *first, u8 *last)
     }
 }
 
+
+/*
+ * Weather. A smart trainer sets the weather its team gains from and the foes
+ * lose from, renews it when it is about to run out, and leans on the moves the
+ * weather helps (Solar Beam without its charge turn in the sun, Thunder that
+ * cannot miss in the rain). Its damage estimates and speed count the weather
+ * too. The worth of a weather is what each Pokémon of the party gains from it
+ * minus what each foe on the field does, the foes counting double.
+ */
+enum
+{
+    WX_NONE,
+    WX_RAIN,
+    WX_SUN,
+    WX_SAND,
+    WX_HAIL
+};
+
+/* The most a weather move is raised or lowered by. */
+#define AI_WEATHER_MAX_BONUS 5
+/* The foes on the field count this many times a Pokémon of the party. */
+#define AI_WEATHER_FOE_WEIGHT 2
+/* The score a Pokémon coming in loses for the sandstorm or hail that hurts it. */
+#define AI_WEATHER_CHIP 8
+#define PERMANENT_WEATHER (B_WEATHER_RAIN_PERMANENT | B_WEATHER_SANDSTORM_PERMANENT | B_WEATHER_SUN_PERMANENT)
+
+static void RefreshWeather(void)
+{
+    sWeather = WX_NONE;
+    if (!WEATHER_HAS_EFFECT)
+        return;
+    if (gBattleWeather & B_WEATHER_RAIN)
+        sWeather = WX_RAIN;
+    else if (gBattleWeather & B_WEATHER_SUN)
+        sWeather = WX_SUN;
+    else if (gBattleWeather & B_WEATHER_SANDSTORM)
+        sWeather = WX_SAND;
+    else if (gBattleWeather & B_WEATHER_HAIL)
+        sWeather = WX_HAIL;
+}
+
+/* The weather runs out at the end of this turn. */
+static bool8 WeatherExpiring(void)
+{
+    return !(gBattleWeather & PERMANENT_WEATHER) && gWishFutureKnock.weatherDuration <= 1;
+}
+
+static bool8 HasType(const struct Fighter *f, u8 type)
+{
+    return f->types[0] == type || f->types[1] == type;
+}
+
+static bool8 HasMoveEffect(const struct Fighter *f, u16 effect)
+{
+    u8 i;
+
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        if (f->moves[i] != MOVE_NONE && gBattleMoves[f->moves[i]].effect == effect)
+            return TRUE;
+    return FALSE;
+}
+
+static bool8 SandImmune(const struct Fighter *f)
+{
+    return HasType(f, TYPE_ROCK) || HasType(f, TYPE_GROUND) || HasType(f, TYPE_STEEL);
+}
+
+/* The speed the weather's abilities give. */
+static u16 WeatherSpeed(const struct Fighter *f)
+{
+    if ((sWeather == WX_RAIN && f->ability == ABILITY_SWIFT_SWIM) || (sWeather == WX_SUN && f->ability == ABILITY_CHLOROPHYLL))
+        return f->speed * 2;
+    return f->speed;
+}
+
+/* What the damage of a move becomes in the weather, in sixteenths. */
+static s32 WeatherDamage16(u8 type, u16 move)
+{
+    s32 mul = 16;
+
+    if ((sWeather == WX_RAIN && type == TYPE_WATER) || (sWeather == WX_SUN && type == TYPE_FIRE))
+        mul = 24;
+    else if ((sWeather == WX_RAIN && type == TYPE_FIRE) || (sWeather == WX_SUN && type == TYPE_WATER))
+        mul = 8;
+    if (gBattleMoves[move].effect == EFFECT_SOLAR_BEAM && (sWeather == WX_RAIN || sWeather == WX_SAND || sWeather == WX_HAIL))
+        mul = mul / 2;
+    return mul;
+}
+
+/* What a Pokémon gains (+) or loses (-) from a weather. */
+static s32 WeatherSynergy(const struct Fighter *f, u8 weather)
+{
+    s32 s = 0;
+
+    switch (weather)
+    {
+    case WX_RAIN:
+        if (f->ability == ABILITY_SWIFT_SWIM)
+            s += 2;
+        if (f->ability == ABILITY_RAIN_DISH)
+            s += 1;
+        if (HasType(f, TYPE_WATER))
+            s += 1;
+        if (HasType(f, TYPE_FIRE))
+            s -= 1;
+        if (HasMoveEffect(f, EFFECT_SOLAR_BEAM))
+            s -= 1;
+        break;
+    case WX_SUN:
+        if (f->ability == ABILITY_CHLOROPHYLL)
+            s += 2;
+        if (HasType(f, TYPE_FIRE))
+            s += 1;
+        if (HasType(f, TYPE_WATER))
+            s -= 1;
+        if (HasMoveEffect(f, EFFECT_SOLAR_BEAM) || HasMoveEffect(f, EFFECT_SYNTHESIS)
+         || HasMoveEffect(f, EFFECT_MOONLIGHT) || HasMoveEffect(f, EFFECT_MORNING_SUN))
+            s += 1;
+        break;
+    case WX_SAND:
+        s += SandImmune(f) ? 1 : -1;
+        if (f->ability == ABILITY_SAND_VEIL)
+            s += 1;
+        break;
+    case WX_HAIL:
+        s += HasType(f, TYPE_ICE) ? 1 : -1;
+        break;
+    }
+    return s;
+}
+
+/* How much better a weather is for the battler's side than for the foes on the field. */
+static s32 WeatherValue(u8 weather, u8 battler)
+{
+    s32 value = 0;
+    u8 first, last, i;
+
+    PartyRange(battler, &first, &last);
+    for (i = first; i < last; i++)
+    {
+        struct Fighter f;
+
+        if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE || GetMonData(&gEnemyParty[i], MON_DATA_HP) == 0)
+            continue;
+        FighterOfMon(&f, &gEnemyParty[i]);
+        value += WeatherSynergy(&f, weather);
+    }
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        struct Fighter foe;
+
+        if (GetBattlerSide(i) == GetBattlerSide(battler) || (gAbsentBattlerFlags & (1 << i)) || gBattleMons[i].hp == 0)
+            continue;
+        FighterOfBattler(&foe, i);
+        value -= AI_WEATHER_FOE_WEIGHT * WeatherSynergy(&foe, weather);
+    }
+    return value;
+}
+
+/* The sandstorm or hail that wears down a Pokémon coming in, as a score. */
+static s32 WeatherChip(const struct Fighter *f)
+{
+    if ((sWeather == WX_SAND && !SandImmune(f)) || (sWeather == WX_HAIL && !HasType(f, TYPE_ICE)))
+        return -AI_WEATHER_CHIP;
+    return 0;
+}
+
+/* What the weather adds to (or takes from) the score of a move. */
+static s32 WeatherMoveAdjust(u8 battler, u16 move, bool8 canKo)
+{
+    u16 effect = gBattleMoves[move].effect;
+    u8 target = WX_NONE;
+    s32 delta;
+
+    RefreshWeather();
+    switch (effect)
+    {
+    case EFFECT_RAIN_DANCE:
+        target = WX_RAIN;
+        break;
+    case EFFECT_SUNNY_DAY:
+        target = WX_SUN;
+        break;
+    case EFFECT_SANDSTORM:
+        target = WX_SAND;
+        break;
+    case EFFECT_HAIL:
+        target = WX_HAIL;
+        break;
+    case EFFECT_SOLAR_BEAM:
+        return sWeather == WX_SUN ? 2 : (sWeather == WX_NONE ? 0 : -2);
+    case EFFECT_THUNDER:
+        return sWeather == WX_RAIN ? 1 : (sWeather == WX_SUN ? -1 : 0);
+    case EFFECT_SYNTHESIS:
+    case EFFECT_MOONLIGHT:
+    case EFFECT_MORNING_SUN:
+        return sWeather == WX_SUN ? 1 : (sWeather == WX_NONE ? 0 : -2);
+    default:
+        return 0;
+    }
+    if (canKo)
+        return 0;
+    if (sWeather == target)
+    {
+        if (!WeatherExpiring())
+            return 0;
+        delta = WeatherValue(target, battler) - WeatherValue(WX_NONE, battler);
+    }
+    else
+    {
+        delta = WeatherValue(target, battler) - WeatherValue(sWeather, battler);
+    }
+    return delta > AI_WEATHER_MAX_BONUS ? AI_WEATHER_MAX_BONUS : (delta < -AI_WEATHER_MAX_BONUS ? -AI_WEATHER_MAX_BONUS : delta);
+}
+
 /* The party slot to send in, or PARTY_SIZE when there is none to choose. */
 static u8 PickSwitchIn(u8 battler, s32 *bestScore, s32 *bestDealt, s32 *bestTaken)
 {
@@ -561,6 +788,7 @@ static u8 PickSwitchIn(u8 battler, s32 *bestScore, s32 *bestDealt, s32 *bestTake
     u8 eligible[PARTY_SIZE];
     u8 first, last, ace = PARTY_SIZE, count = 0, alive = 0, best = PARTY_SIZE, i, j;
 
+    RefreshWeather();
     PartyRange(battler, &first, &last);
     for (i = first; i < last; i++)
     {
@@ -594,7 +822,7 @@ static u8 PickSwitchIn(u8 battler, s32 *bestScore, s32 *bestDealt, s32 *bestTake
         s32 dealt, taken, score;
 
         FighterOfMon(&f, &gEnemyParty[eligible[i]]);
-        score = ScoreAgainstFoes(&f, battler, &dealt, &taken);
+        score = ScoreAgainstFoes(&f, battler, &dealt, &taken) + WeatherChip(&f);
         /* A partner's Earthquake or Surf would hit the one that comes in. */
         if (partnerHere && gBattleMons[partner].hp > 0)
         {
@@ -645,6 +873,7 @@ bool CtrAi_ShouldSwitchOut(uint8_t battler)
         memset(sLastSwitchTurn, 0, sizeof(sLastSwitchTurn));
     if (sLastSwitchTurn[battler] != 0 && turn + 1 - sLastSwitchTurn[battler] < AI_SWITCH_COOLDOWN)
         return false;
+    RefreshWeather();
     FighterOfBattler(&cur, battler);
     curScore = ScoreAgainstFoes(&cur, battler, &curDealt, &curTaken);
     if (curTaken < AI_SWITCH_HURT_PCT || curDealt >= AI_SWITCH_THREAT_PCT)
